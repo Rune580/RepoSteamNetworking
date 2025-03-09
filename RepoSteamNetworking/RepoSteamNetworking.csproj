@@ -62,11 +62,13 @@
     <ItemGroup>
         <GameLib Include="Assembly-CSharp" Visible="false" />
         <GameLib Include="Facepunch.Steamworks.Win64" Visible="false" />
+        <GameLib Include="Unity.InputSystem" Visible="false" />
     </ItemGroup>
 
     <ItemGroup>
         <Reference Include="../libs/Assembly-CSharp.dll" Publicize="true" />
         <Reference Include="../libs/Facepunch.Steamworks.Win64.dll" />
+        <Reference Include="../libs/Unity.InputSystem.dll" />
     </ItemGroup>
 
     <!-- If GameManagedDir is set to a valid path, fetchs game libraries from the directory, strips and publicizes them, and stores them in the libs directory. -->

@@ -8,6 +8,8 @@ namespace RepoSteamNetworking;
 
 public class RepoNetworkSocketManager : SocketManager
 {
+    public Action? OnClientConnected;
+    
     public RepoNetworkSocketManager()
     {
         Logging.Info("Creating new SocketManager");
@@ -27,6 +29,8 @@ public class RepoNetworkSocketManager : SocketManager
         base.OnConnected(connection, info);
         
         Logging.Info($"{info.Identity} has connected!");
+        
+        OnClientConnected?.Invoke();
     }
 
     public override void OnDisconnected(Connection connection, ConnectionInfo info)
@@ -46,8 +50,5 @@ public class RepoNetworkSocketManager : SocketManager
         var message = Encoding.UTF8.GetString(bytes);
         
         Logging.Info($"Message received from {identity}!\nMessage: {message}");
-
-        var result = connection.SendMessage(data, size);
-        Logging.Info($"Send message (On Message): {result}");
     }
 }
