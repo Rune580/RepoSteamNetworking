@@ -1,0 +1,102 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <LangVersion>preview</LangVersion>
+        <Nullable>enable</Nullable>
+        <!-- Change the lines below as you see fit -->
+        <Authors>Rune580</Authors>
+        <Product>RepoSteamNetworking</Product>
+        <BepInExPluginGuid>com.rune580.reposteamnetworking</BepInExPluginGuid>
+        <BepInExPluginName>Repo Steam Networking</BepInExPluginName>
+        <RootNamespace>RepoSteamNetworking</RootNamespace>
+    </PropertyGroup>
+
+    <!-- Nuget Package specific -->
+    <PropertyGroup>
+        <PackageId>Rune580.Mods.Repo.RepoSteamNetworking</PackageId>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/Wet-Boys/RepoEmotesApi</PackageProjectUrl>
+<!--        <PackageIcon>repo-emotes-api-static-icon.png</PackageIcon>-->
+        <RepositoryUrl>https://github.com/Wet-Boys/RepoEmotesApi</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+    </PropertyGroup>
+
+    <!-- Nuget Package includes -->
+    <ItemGroup>
+        <None Include="../README.md" Pack="true" PackagePath="/" Visible="false" />
+        <None Include="../LICENSE" Pack="true" PackagePath="/" Visible="false" />
+        <None Include="../Thunderstore/icons/repo-emotes-api-static-icon.png" Pack="true" PackagePath="/" Visible="false" />
+    </ItemGroup>
+
+    <!-- MinVer -->
+    <PropertyGroup>
+        <MinVerDefaultPreReleaseIdentifiers>dev</MinVerDefaultPreReleaseIdentifiers>
+    </PropertyGroup>
+
+    <!-- Project Nuget Packages -->
+    <ItemGroup>
+        <PackageReference Include="MinVer" Version="6.0.0">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
+        <PackageReference Include="BepInEx.Core" Version="5.*" />
+        <PackageReference Include="UnityEngine.Modules" Version="2022.3.21" />
+    </ItemGroup>
+    
+    <PropertyGroup>
+        <LibsDir>$([System.IO.Path]::GetFullPath('./libs/'))</LibsDir>
+    </PropertyGroup>
+
+    <!-- Game libraries -->
+    <ItemGroup>
+        <GameLib Include="Assembly-CSharp" Visible="false" />
+        <GameLib Include="Facepunch.Steamworks.Win64" Visible="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="../libs/Assembly-CSharp.dll" Publicize="true" />
+        <Reference Include="../libs/Facepunch.Steamworks.Win64.dll" />
+    </ItemGroup>
+
+    <!-- If GameManagedDir is set to a valid path, fetchs game libraries from the directory, strips and publicizes them, and stores them in the libs directory. -->
+    <!-- You can update a dll by removing its file in the libs dir and running `Update-Game-Libs.sh` -->
+    <Target Name="FetchGameLibraries">
+        <Exec Command="dotnet assembly-publicizer $(GameManagedDir)%(GameLib.Identity).dll --overwrite --strip-only -o $(LibsDir)" Condition="'%(GameLib.Publicize)' == '' And !Exists('$(LibsDir)%(GameLib.Identity).dll')" />
+        <Exec Command="dotnet assembly-publicizer $(GameManagedDir)%(GameLib.Identity).dll --overwrite --strip -o $(LibsDir)" Condition="'%(GameLib.Publicize)' == 'true' And !Exists('$(LibsDir)%(GameLib.Identity).dll')" />
+
+        <Move SourceFiles="$(LibsDir)%(GameLib.Identity)-publicized.dll" DestinationFiles="$(LibsDir)%(GameLib.Identity).dll" Condition="Exists('$(LibsDir)%(GameLib.Identity)-publicized.dll')" />
+    </Target>
+
+    <Target Name="SetPluginVersion" BeforeTargets="AddGeneratedFile" DependsOnTargets="MinVer">
+        <PropertyGroup>
+            <PlainVersion>$(MinVerMajor).$(MinVerMinor).$(MinVerPatch)</PlainVersion>
+            <BepInExPluginVersion>$(PlainVersion)</BepInExPluginVersion>
+        </PropertyGroup>
+    </Target>
+
+    <Target Name="PackageThunderstoreArtifact" DependsOnTargets="SetPluginVersion" AfterTargets="PostBuildEvent" Condition="$(Configuration) == 'Release'">
+        <Exec Command="dotnet tcli build --config-path $(ProjectDir)../Thunderstore/thunderstore.toml --package-version $(PlainVersion)" />
+
+        <ItemGroup>
+            <FilesToRename Include="$(ProjectDir)../dist/*-$(PlainVersion).zip" />
+        </ItemGroup>
+
+        <Move SourceFiles="@(FilesToRename)" DestinationFiles="@(FilesToRename -&gt; Replace($(PlainVersion), $(MinVerVersion)))" />
+    </Target>
+
+    <Target Name="PublishThunderstoreArtifact" DependsOnTargets="SetPluginVersion">
+        <Exec Command="dotnet tcli publish --config-path $(ProjectDir)../Thunderstore/thunderstore.toml --file $(ProjectDir)../*-$(MinVerVersion).zip" />
+    </Target>
+
+</Project>

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "tcli": {
+      "version": "0.2.3",
+      "commands": [
+        "tcli"
+      ],
+      "rollForward": false
+    },
+    "bepinex.assemblypublicizer.cli": {
+      "version": "0.4.3",
+      "commands": [
+        "assembly-publicizer"
+      ],
+      "rollForward": true
+    }
+  }
+}
