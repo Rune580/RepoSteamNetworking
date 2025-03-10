@@ -18,11 +18,12 @@ public static class RepoSteamNetwork
         
         var packet = NetworkPacketRegistry.CreatePacket(packetId);
         
-        packet.Deserialize(message);
+        // packet.Deserialize(message);
         // packet.InvokeCallback(packet);
 
         if (destination == NetworkDestination.HostOnly)
         {
+            packet.Deserialize(message);
             packet.InvokeCallback();
             return;
         }
