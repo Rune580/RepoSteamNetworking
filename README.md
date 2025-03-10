@@ -37,7 +37,7 @@ Register callback
 ```csharp
 {
     ...
-    RepoSteamNetwork.RegisterCallback<ExamplePacket>();
+    RepoSteamNetwork.RegisterCallback<ExamplePacket>(OnExamplePacketReceived);
     ...
 }
 
