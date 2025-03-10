@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
+using RepoSteamNetworking.Networking;
 using Steamworks;
 using Steamworks.Data;
-using UnityEngine;
 
 namespace RepoSteamNetworking.Patches;
 
@@ -12,7 +12,6 @@ public static class SteamManagerPatches
     public static class OnAwakePatch
     {
         // ReSharper disable once InconsistentNaming
-        [SuppressMessage("Method Declaration", "Harmony003:Harmony non-ref patch parameters modified")]
         public static void Postfix(SteamManager __instance)
         {
             RepoNetworkingServer.CreateSingleton(__instance.gameObject);
@@ -43,18 +42,6 @@ public static class SteamManagerPatches
             var id = _lobby.Owner.Id;
             
             RepoNetworkingClient.Instance.ConnectToServer(id);
-            RepoNetworkingClient.Instance.SendMessageToServer("Mario has logged in");
-        }
-    }
-    
-    [HarmonyPatch(typeof(SteamManager), nameof(SteamManager.OnLobbyMemberJoined))]
-    public static class OnLobbyMemberJoinedPatch
-    {
-        // ReSharper disable once InconsistentNaming
-        [SuppressMessage("Method Declaration", "Harmony003:Harmony non-ref patch parameters modified")]
-        public static void Postfix()
-        {
-            RepoNetworkingServer.Instance.SendMessageToClients("Hello Mario");
         }
     }
     
@@ -68,6 +55,7 @@ public static class SteamManagerPatches
             if (__instance.currentLobby.IsOwnedBy(SteamClient.SteamId))
             {
                 RepoNetworkingServer.Instance.StopSocketServer();
+                RepoNetworkingClient.Instance.DisconnectFromServer();
             }
             else
             {

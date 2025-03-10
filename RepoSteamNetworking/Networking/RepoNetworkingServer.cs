@@ -1,9 +1,11 @@
 using System.Text;
+using RepoSteamNetworking.Networking.Data;
+using RepoSteamNetworking.Utils;
 using Steamworks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace RepoSteamNetworking;
+namespace RepoSteamNetworking.Networking;
 
 public class RepoNetworkingServer : MonoBehaviour
 {
@@ -13,9 +15,9 @@ public class RepoNetworkingServer : MonoBehaviour
     private bool _serverActive;
     private SteamId _id;
     private RepoNetworkSocketManager? _socketManager;
-
-    public bool spamMessages;
-
+    
+    internal bool ServerActive => _instance is not null && _serverActive;
+    
     internal static void CreateSingleton(GameObject parent)
     {
         if (_instance is not null)
@@ -45,11 +47,6 @@ public class RepoNetworkingServer : MonoBehaviour
         
         // Just keep receiving data in an update loop?
         _socketManager.Receive();
-
-        if (Keyboard.current.hKey.wasPressedThisFrame)
-        {
-            SendMessageToClients("Hello Mario");
-        }
     }
 
     public void StartSocketServer(SteamId id)
@@ -57,8 +54,6 @@ public class RepoNetworkingServer : MonoBehaviour
         _id = id;
         _socketManager = SteamNetworkingSockets.CreateRelaySocket<RepoNetworkSocketManager>();
         _serverActive = true;
-
-        _socketManager.OnClientConnected += () => SendMessageToClients("Hello Mario");
     }
 
     public void StopSocketServer()
@@ -67,23 +62,21 @@ public class RepoNetworkingServer : MonoBehaviour
         _serverActive = false;
     }
 
-    public void SendMessageToClients(string message)
+    public void SendSocketMessageToClients(SocketMessage message)
     {
         if (_socketManager is null)
         {
             Logging.Info("No server to send messages, can't send message!");
             return;
         }
-
-        var data = Encoding.UTF8.GetBytes(message);
         
         var connected = _socketManager.Connected;
         foreach (var connection in connected)
         {
-            var result = connection.SendMessage(data);
-            connection.Flush();
+            var result = connection.SendMessage(message.GetBytes());
+            // connection.Flush();
             
-            Logging.Info($"[SendMessageToClients] Client: {connection.Id} Result: {result}");
+            // Logging.Info($"[SendMessageToClients] Client: {connection.Id} Result: {result}");
         }
     }
 }

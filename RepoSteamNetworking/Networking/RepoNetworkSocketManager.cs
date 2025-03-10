@@ -1,10 +1,11 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;
 
-namespace RepoSteamNetworking;
+namespace RepoSteamNetworking.Networking;
 
 public class RepoNetworkSocketManager : SocketManager
 {
@@ -30,6 +31,8 @@ public class RepoNetworkSocketManager : SocketManager
         
         Logging.Info($"{info.Identity} has connected!");
         
+        Logging.Info($"CONNECTION ID: {connection.Id} {connection.UserData}");
+        
         OnClientConnected?.Invoke();
     }
 
@@ -47,8 +50,6 @@ public class RepoNetworkSocketManager : SocketManager
         var bytes = new byte[size];
         Marshal.Copy(data, bytes, 0, size);
         
-        var message = Encoding.UTF8.GetString(bytes);
-        
-        Logging.Info($"Message received from {identity}!\nMessage: {message}");
+        RepoSteamNetwork.OnHostReceivedMessage(bytes);
     }
 }

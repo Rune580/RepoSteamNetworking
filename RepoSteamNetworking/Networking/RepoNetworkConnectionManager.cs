@@ -1,10 +1,11 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;
 
-namespace RepoSteamNetworking;
+namespace RepoSteamNetworking.Networking;
 
 public class RepoNetworkConnectionManager : ConnectionManager
 {
@@ -48,8 +49,6 @@ public class RepoNetworkConnectionManager : ConnectionManager
         var bytes = new byte[size];
         Marshal.Copy(data, bytes, 0, size);
         
-        var message = Encoding.UTF8.GetString(bytes);
-        
-        Logging.Info($"Message received from host: {message}");
+        RepoSteamNetwork.OnClientMessageReceived(bytes);
     }
 }

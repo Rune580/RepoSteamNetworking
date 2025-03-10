@@ -1,7 +1,7 @@
 using BepInEx.Logging;
 using UnityEngine;
 
-namespace RepoSteamNetworking;
+namespace RepoSteamNetworking.Utils;
 
 internal static class Logging
 {

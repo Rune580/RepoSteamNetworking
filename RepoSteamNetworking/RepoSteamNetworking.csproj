@@ -52,33 +52,8 @@
         <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
         <PackageReference Include="BepInEx.Core" Version="5.*" />
         <PackageReference Include="UnityEngine.Modules" Version="2022.3.21" />
+        <PackageReference Include="R.E.P.O.GameLibs.Steam" Version="0.1.2-ngd.0" />
     </ItemGroup>
-    
-    <PropertyGroup>
-        <LibsDir>$([System.IO.Path]::GetFullPath('./libs/'))</LibsDir>
-    </PropertyGroup>
-
-    <!-- Game libraries -->
-    <ItemGroup>
-        <GameLib Include="Assembly-CSharp" Visible="false" />
-        <GameLib Include="Facepunch.Steamworks.Win64" Visible="false" />
-        <GameLib Include="Unity.InputSystem" Visible="false" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="../libs/Assembly-CSharp.dll" Publicize="true" />
-        <Reference Include="../libs/Facepunch.Steamworks.Win64.dll" />
-        <Reference Include="../libs/Unity.InputSystem.dll" />
-    </ItemGroup>
-
-    <!-- If GameManagedDir is set to a valid path, fetchs game libraries from the directory, strips and publicizes them, and stores them in the libs directory. -->
-    <!-- You can update a dll by removing its file in the libs dir and running `Update-Game-Libs.sh` -->
-    <Target Name="FetchGameLibraries">
-        <Exec Command="dotnet assembly-publicizer $(GameManagedDir)%(GameLib.Identity).dll --overwrite --strip-only -o $(LibsDir)" Condition="'%(GameLib.Publicize)' == '' And !Exists('$(LibsDir)%(GameLib.Identity).dll')" />
-        <Exec Command="dotnet assembly-publicizer $(GameManagedDir)%(GameLib.Identity).dll --overwrite --strip -o $(LibsDir)" Condition="'%(GameLib.Publicize)' == 'true' And !Exists('$(LibsDir)%(GameLib.Identity).dll')" />
-
-        <Move SourceFiles="$(LibsDir)%(GameLib.Identity)-publicized.dll" DestinationFiles="$(LibsDir)%(GameLib.Identity).dll" Condition="Exists('$(LibsDir)%(GameLib.Identity)-publicized.dll')" />
-    </Target>
 
     <Target Name="SetPluginVersion" BeforeTargets="AddGeneratedFile" DependsOnTargets="MinVer">
         <PropertyGroup>

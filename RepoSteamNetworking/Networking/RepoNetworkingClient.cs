@@ -1,9 +1,11 @@
 using System.Text;
+using RepoSteamNetworking.Networking.Data;
+using RepoSteamNetworking.Utils;
 using Steamworks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace RepoSteamNetworking;
+namespace RepoSteamNetworking.Networking;
 
 public class RepoNetworkingClient : MonoBehaviour
 {
@@ -42,15 +44,12 @@ public class RepoNetworkingClient : MonoBehaviour
         
         // Just keep receiving data in an update loop?
         _connectionManager.Receive();
-        
-        if (Keyboard.current.hKey.wasPressedThisFrame)
-        {
-            SendMessageToServer("Hello Mario");
-        }
     }
 
     public void ConnectToServer(SteamId hostId)
     {
+        // Logging.Info($"CONNECT TO SERVER: {hostId.Value} {hostId.AccountId}");
+        
         _hostId = hostId;
         _connectionManager = SteamNetworkingSockets.ConnectRelay<RepoNetworkConnectionManager>(_hostId);
         _clientActive = true;
@@ -62,17 +61,16 @@ public class RepoNetworkingClient : MonoBehaviour
         _clientActive = false;
     }
 
-    public void SendMessageToServer(string message)
+    public void SendSocketMessageToServer(SocketMessage message)
     {
         if (_connectionManager is null)
         {
             Logging.Info("No connection to server, can't send message!");
             return;
         }
+
+        var result = _connectionManager.Connection.SendMessage(message.GetBytes());
         
-        var result = _connectionManager.Connection.SendMessage(Encoding.UTF8.GetBytes(message));
-        _connectionManager.Connection.Flush();
-        
-        Logging.Info($"[SendMessageToServer] Result: {result}");
+        // Logging.Info($"[SendMessageToServer] Result: {result}");
     }
 }
