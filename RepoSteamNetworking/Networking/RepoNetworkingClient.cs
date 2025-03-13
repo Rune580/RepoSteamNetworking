@@ -1,9 +1,8 @@
-using System.Text;
 using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Utils;
 using Steamworks;
+using Steamworks.Data;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace RepoSteamNetworking.Networking;
 
@@ -13,7 +12,7 @@ public class RepoNetworkingClient : MonoBehaviour
     public static RepoNetworkingClient Instance => _instance;
     
     private bool _clientActive;
-    private SteamId _hostId;
+    private Lobby _currentLobby;
     private RepoNetworkConnectionManager? _connectionManager;
     
     internal static void CreateSingleton(GameObject parent)
@@ -27,7 +26,7 @@ public class RepoNetworkingClient : MonoBehaviour
         Instantiate(new GameObject("RepoNetworkingClient"), parent.transform)
             .AddComponent<RepoNetworkingClient>();
         
-        Logging.Info("Created RepoNetworkingServer");
+        Logging.Info("Created RepoNetworkingClient");
     }
 
     private void Awake()
@@ -46,13 +45,13 @@ public class RepoNetworkingClient : MonoBehaviour
         _connectionManager.Receive();
     }
 
-    public void ConnectToServer(SteamId hostId)
+    public void ConnectToServer(Lobby lobby)
     {
-        // Logging.Info($"CONNECT TO SERVER: {hostId.Value} {hostId.AccountId}");
-        
-        _hostId = hostId;
-        _connectionManager = SteamNetworkingSockets.ConnectRelay<RepoNetworkConnectionManager>(_hostId);
+        _currentLobby = lobby;
+        _connectionManager = SteamNetworkingSockets.ConnectRelay<RepoNetworkConnectionManager>(lobby.Owner.Id);
         _clientActive = true;
+        
+        _connectionManager.SetLobby(lobby);
     }
 
     public void DisconnectFromServer()

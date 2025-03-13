@@ -12,7 +12,6 @@ public static class RepoSteamNetwork
     {
         var message = new SocketMessage(data);
         var packetId = message.Read<int>();
-        
         var destination = (NetworkDestination)message.Read<byte>();
         
         var packet = NetworkPacketRegistry.CreatePacket(packetId);
@@ -27,10 +26,7 @@ public static class RepoSteamNetwork
             return;
         }
 
-        if (destination == NetworkDestination.Everyone)
-        {
-            RepoNetworkingServer.Instance.SendSocketMessageToClients(new SocketMessage(data));
-        }
+        RepoNetworkingServer.Instance.SendSocketMessageToClients(new SocketMessage(data));
     }
     
     internal static void OnClientMessageReceived(byte[] data)
@@ -39,15 +35,20 @@ public static class RepoSteamNetwork
         
         var message = new SocketMessage(data);
         var packetId = message.Read<int>();
+        var destination = (NetworkDestination)message.Read<byte>();
 
         var packet = NetworkPacketRegistry.CreatePacket(packetId);
+
+        // Don't process packets that are for other clients only on the host.
+        if (destination == NetworkDestination.ClientsOnly && RepoNetworkingServer.Instance.ServerActive)
+            return;
         
         packet.Deserialize(message);
         packet.InvokeCallback();
     }
 
     public static void RegisterPacket<TPacket>()
-        where TPacket : NetworkPacket<TPacket>, new()
+        where TPacket : NetworkPacket<TPacket>
     {
         NetworkPacketRegistry.RegisterPacket(typeof(TPacket));
     }
@@ -64,7 +65,11 @@ public static class RepoSteamNetwork
     {
         var message = packet.Serialize(destination);
 
-        if (RepoNetworkingServer.Instance.ServerActive)
+        if (destination == NetworkDestination.HostOnly)
+        {
+            RepoNetworkingClient.Instance.SendSocketMessageToServer(message);
+        }
+        else if (RepoNetworkingServer.Instance.ServerActive)
         {
             RepoNetworkingServer.Instance.SendSocketMessageToClients(message);
         }

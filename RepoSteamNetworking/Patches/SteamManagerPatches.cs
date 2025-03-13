@@ -26,9 +26,7 @@ public static class SteamManagerPatches
         [SuppressMessage("Method Declaration", "Harmony003:Harmony non-ref patch parameters modified")]
         public static void Postfix(Lobby _lobby)
         {
-            var id = _lobby.Owner.Id;
-            
-            RepoNetworkingServer.Instance.StartSocketServer(id);
+            RepoNetworkingServer.Instance.StartSocketServer(_lobby);
         }
     }
 
@@ -39,9 +37,7 @@ public static class SteamManagerPatches
         [SuppressMessage("Method Declaration", "Harmony003:Harmony non-ref patch parameters modified")]
         public static void Postfix(Lobby _lobby)
         {
-            var id = _lobby.Owner.Id;
-            
-            RepoNetworkingClient.Instance.ConnectToServer(id);
+            RepoNetworkingClient.Instance.ConnectToServer(_lobby);
         }
     }
     

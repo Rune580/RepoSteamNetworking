@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RepoSteamNetworking.API;
+using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;
@@ -9,6 +10,8 @@ namespace RepoSteamNetworking.Networking;
 
 internal class RepoNetworkConnectionManager : ConnectionManager
 {
+    private Lobby _currentLobby;
+    
     public RepoNetworkConnectionManager()
     {
         Logging.Info("Creating new ConnectionManager");
@@ -33,6 +36,8 @@ internal class RepoNetworkConnectionManager : ConnectionManager
         base.OnConnected(info);
         
         Logging.Info($"Connected to {info.Identity}");
+        
+        Logging.Info("Starting Handshake!");
     }
 
     public override void OnDisconnected(ConnectionInfo info)
@@ -50,5 +55,21 @@ internal class RepoNetworkConnectionManager : ConnectionManager
         Marshal.Copy(data, bytes, 0, size);
         
         RepoSteamNetwork.OnClientMessageReceived(bytes);
+    }
+
+    public void SetLobby(Lobby lobby)
+    {
+        _currentLobby = lobby;
+        
+        StartHandshake();
+    }
+
+    // Send handshake packet to host to verify this connection is from a player who is actually in the lobby, and not 
+    // a malicious user attempting to connect from outside the lobby.
+    public void StartHandshake()
+    {
+        var handshakePacket = new InitialHandshakePacket();
+        handshakePacket.SetData(_currentLobby);
+        RepoSteamNetwork.SendPacket(handshakePacket, NetworkDestination.HostOnly);
     }
 }

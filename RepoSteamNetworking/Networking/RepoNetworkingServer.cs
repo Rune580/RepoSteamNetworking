@@ -1,9 +1,11 @@
-using System.Text;
+using System;
+using System.Linq;
 using RepoSteamNetworking.Networking.Data;
+using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Utils;
 using Steamworks;
+using Steamworks.Data;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace RepoSteamNetworking.Networking;
 
@@ -13,10 +15,12 @@ public class RepoNetworkingServer : MonoBehaviour
     public static RepoNetworkingServer Instance => _instance;
 
     private bool _serverActive;
-    private SteamId _id;
+    internal Lobby CurrentLobby { get; private set; }
     private RepoNetworkSocketManager? _socketManager;
     
     internal bool ServerActive => _instance is not null && _serverActive;
+    
+    internal string AuthKey => CurrentLobby.GetData("RSN_Auth_Key");
     
     internal static void CreateSingleton(GameObject parent)
     {
@@ -49,11 +53,15 @@ public class RepoNetworkingServer : MonoBehaviour
         _socketManager.Receive();
     }
 
-    public void StartSocketServer(SteamId id)
+    public void StartSocketServer(Lobby lobby)
     {
-        _id = id;
+        CurrentLobby = lobby;
         _socketManager = SteamNetworkingSockets.CreateRelaySocket<RepoNetworkSocketManager>();
         _serverActive = true;
+
+        // Create a unique key and store it in the lobby, this requires clients to be a member of the lobby in order to access the key.
+        var guid = Guid.NewGuid();
+        CurrentLobby.SetData("RSN_Auth_Key", guid.ToString());
     }
 
     public void StopSocketServer()
@@ -74,9 +82,20 @@ public class RepoNetworkingServer : MonoBehaviour
         foreach (var connection in connected)
         {
             var result = connection.SendMessage(message.GetBytes());
-            // connection.Flush();
-            
-            // Logging.Info($"[SendMessageToClients] Client: {connection.Id} Result: {result}");
         }
+    }
+
+    internal bool VerifyHandshake(InitialHandshakePacket packet)
+    {
+        if (AuthKey != packet.AuthKey)
+            return false;
+        
+        if (CurrentLobby.Id != packet.LobbyId)
+            return false;
+
+        if (CurrentLobby.Members.Any(member => member.Id == packet.PlayerId))
+            return true;
+        
+        return false;
     }
 }

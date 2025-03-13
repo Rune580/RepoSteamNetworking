@@ -7,7 +7,11 @@ public enum NetworkDestination
     /// </summary>
     HostOnly = 0,
     /// <summary>
+    /// Only clients will receive the packet, if sending from a client, the packet will pass through the host without it being processed by the host.
+    /// </summary>
+    ClientsOnly = 1,
+    /// <summary>
     /// All Clients, including the Host, will receive the packet
     /// </summary>
-    Everyone = 1,
+    Everyone = 2,
 }

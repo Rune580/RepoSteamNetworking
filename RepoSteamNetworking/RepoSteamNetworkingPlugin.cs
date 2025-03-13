@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using BepInEx;
 using HarmonyLib;
+using RepoSteamNetworking.API;
+using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Utils;
 
 namespace RepoSteamNetworking;
@@ -13,5 +15,12 @@ public class RepoSteamNetworkingPlugin : BaseUnityPlugin
         Logging.SetLogSource(Logger);
         
         Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), PluginInfo.PLUGIN_GUID);
+        
+        RegisterPackets();
+    }
+
+    private void RegisterPackets()
+    {
+        RepoSteamNetwork.RegisterPacket<InitialHandshakePacket>();
     }
 }
