@@ -15,7 +15,7 @@ internal class InitialHandshakePacket : NetworkPacket<InitialHandshakePacket>
     {
         LobbyId = lobby.Id;
         PlayerId = SteamClient.SteamId;
-        AuthKey = lobby.GetData("RSN_Auth_Key");
+        AuthKey = lobby.GetMemberData(lobby.Owner, "RSN_Auth_Key");
     }
     
     protected override void WriteData(SocketMessage socketMessage)

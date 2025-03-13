@@ -20,7 +20,7 @@ public class RepoNetworkingServer : MonoBehaviour
     
     internal bool ServerActive => _instance is not null && _serverActive;
     
-    internal string AuthKey => CurrentLobby.GetData("RSN_Auth_Key");
+    internal string AuthKey => CurrentLobby.GetMemberData(CurrentLobby.Owner, "RSN_Auth_Key");
     
     internal static void CreateSingleton(GameObject parent)
     {
@@ -58,10 +58,15 @@ public class RepoNetworkingServer : MonoBehaviour
         CurrentLobby = lobby;
         _socketManager = SteamNetworkingSockets.CreateRelaySocket<RepoNetworkSocketManager>();
         _serverActive = true;
+        
+        CreateAuthKeyForHandshake();
+    }
 
+    public void CreateAuthKeyForHandshake()
+    {
         // Create a unique key and store it in the lobby, this requires clients to be a member of the lobby in order to access the key.
         var guid = Guid.NewGuid();
-        CurrentLobby.SetData("RSN_Auth_Key", guid.ToString());
+        CurrentLobby.SetMemberData("RSN_Auth_Key", guid.ToString());
     }
 
     public void StopSocketServer()

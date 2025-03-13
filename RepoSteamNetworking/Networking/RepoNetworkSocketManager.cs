@@ -75,6 +75,7 @@ internal class RepoNetworkSocketManager : SocketManager
         Logging.Info($"{info.Identity} has disconnected!");
 
         _verifiedConnectionIds.Remove(connection.Id);
+        StopVerificationTimer(connection.Id);
     }
 
     public override void OnMessage(Connection connection, NetIdentity identity, IntPtr data, int size, long messageNum, long recvTime, int channel)
