@@ -1,7 +1,9 @@
 using System;
+using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Networking.Data;
+using RepoSteamNetworking.Networking.Packets;
 
-namespace RepoSteamNetworking.Networking.Packets;
+namespace RepoSteamNetworking.API;
 
 public abstract class NetworkPacket<TPacket> : NetworkPacket
     where TPacket : NetworkPacket<TPacket>
@@ -29,8 +31,8 @@ public abstract class NetworkPacket
 
         var packetId = NetworkPacketRegistry.GetPacketId(GetType());
 
-        message.WriteInt(packetId);
-        message.WriteByte((byte)destination);
+        message.Write(packetId);
+        message.Write((byte)destination);
         
         WriteData(message);
         

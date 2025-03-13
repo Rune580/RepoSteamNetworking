@@ -1,13 +1,13 @@
 using System;
 using System.Runtime.InteropServices;
-using System.Text;
+using RepoSteamNetworking.API;
 using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;
 
 namespace RepoSteamNetworking.Networking;
 
-public class RepoNetworkSocketManager : SocketManager
+internal class RepoNetworkSocketManager : SocketManager
 {
     public Action? OnClientConnected;
     

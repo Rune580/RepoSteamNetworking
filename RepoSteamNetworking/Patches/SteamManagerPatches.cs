@@ -53,14 +53,9 @@ public static class SteamManagerPatches
         public static void Prefix(SteamManager __instance)
         {
             if (__instance.currentLobby.IsOwnedBy(SteamClient.SteamId))
-            {
                 RepoNetworkingServer.Instance.StopSocketServer();
-                RepoNetworkingClient.Instance.DisconnectFromServer();
-            }
-            else
-            {
-                RepoNetworkingClient.Instance.DisconnectFromServer();
-            }
+            
+            RepoNetworkingClient.Instance.DisconnectFromServer();
         }
     }
 }

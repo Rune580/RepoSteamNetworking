@@ -4,17 +4,16 @@ using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Utils;
 
-
-namespace RepoSteamNetworking;
+namespace RepoSteamNetworking.API;
 
 public static class RepoSteamNetwork
 {
     internal static void OnHostReceivedMessage(byte[] data)
     {
         var message = new SocketMessage(data);
-        var packetId = message.ReadInt();
+        var packetId = message.Read<int>();
         
-        var destination = (NetworkDestination)message.ReadByte();
+        var destination = (NetworkDestination)message.Read<byte>();
         
         var packet = NetworkPacketRegistry.CreatePacket(packetId);
         
@@ -39,7 +38,7 @@ public static class RepoSteamNetwork
         Logging.Info($"Received {data.Length} bytes from server!");
         
         var message = new SocketMessage(data);
-        var packetId = message.ReadInt();
+        var packetId = message.Read<int>();
 
         var packet = NetworkPacketRegistry.CreatePacket(packetId);
         
