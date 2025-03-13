@@ -13,14 +13,14 @@ public class ExamplePacket : NetworkPacket<ExamplePacket>
     
     protected override void WriteData(SocketMessage socketMessage) 
     {
-        socketMessage.WriteString(ExampleDataString);
-        socketMessage.WriteVector3(ExampleVector);
+        socketMessage.Write(ExampleDataString);
+        socketMessage.Write(ExampleVector);
     }
     
     protected override void ReadData(SocketMessage socketMessage) 
     {
-        ExampleDataString = socketMessage.ReadString();
-        ExampleVector = socketMessage.ReadVector3();
+        ExampleDataString = socketMessage.Read<string>();
+        ExampleVector = socketMessage.Read<Vector3>();
     }
 }
 ```
@@ -57,8 +57,8 @@ public class ExamplePacket : NetworkPacket<ExamplePacket>
     
     protected override void ReadData(SocketMessage socketMessage) 
     {
-        ExampleDataString = socketMessage.ReadString();
-        ExampleVector = socketMessage.ReadVector3();
+        ExampleDataString = socketMessage.Read<string>();
+        ExampleVector = socketMessage.Read<Vector3>();
         
         // Do stuff with your data here
         
