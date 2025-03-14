@@ -2,7 +2,6 @@ using System;
 using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
-using RepoSteamNetworking.Utils;
 
 namespace RepoSteamNetworking.API;
 
@@ -15,9 +14,6 @@ public static class RepoSteamNetwork
         var destination = (NetworkDestination)message.Read<byte>();
         
         var packet = NetworkPacketRegistry.CreatePacket(packetId);
-        
-        // packet.Deserialize(message);
-        // packet.InvokeCallback(packet);
 
         if (destination == NetworkDestination.HostOnly)
         {
@@ -31,15 +27,13 @@ public static class RepoSteamNetwork
     
     internal static void OnClientMessageReceived(byte[] data)
     {
-        Logging.Info($"Received {data.Length} bytes from server!");
-        
         var message = new SocketMessage(data);
         var packetId = message.Read<int>();
         var destination = (NetworkDestination)message.Read<byte>();
 
         var packet = NetworkPacketRegistry.CreatePacket(packetId);
 
-        // Don't process packets that are for other clients only on the host.
+        // Don't process packets that are for clients only on the host.
         if (destination == NetworkDestination.ClientsOnly && RepoNetworkingServer.Instance.ServerActive)
             return;
         

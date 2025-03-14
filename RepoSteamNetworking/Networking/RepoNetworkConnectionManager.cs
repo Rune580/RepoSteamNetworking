@@ -65,7 +65,7 @@ internal class RepoNetworkConnectionManager : ConnectionManager
     }
 
     // Send handshake packet to host to verify this connection is from a player who is actually in the lobby, and not 
-    // a malicious user attempting to connect from outside the lobby.
+    // a potentially malicious user attempting to connect from outside the lobby.
     public void StartHandshake()
     {
         var handshakePacket = new InitialHandshakePacket();
