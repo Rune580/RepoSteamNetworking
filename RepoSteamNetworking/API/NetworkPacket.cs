@@ -2,6 +2,7 @@ using System;
 using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
+using Steamworks;
 
 namespace RepoSteamNetworking.API;
 
@@ -21,18 +22,40 @@ public abstract class NetworkPacket<TPacket> : NetworkPacket
         
         _callback?.Invoke(packetCasted);
     }
+
+    /// <summary>
+    /// Sets the target of this packet to be the SteamId of a user.
+    /// Only used when <see cref="NetworkDestination"/> is <see cref="NetworkDestination.PacketTarget"/>
+    /// </summary>
+    public TPacket SetTarget(SteamId target)
+    {
+        Header.Target = target;
+        return (TPacket)this;
+    }
+
+    /// <summary>
+    /// Sets the target of this packet to the SteamId of the sender.
+    /// Only used when <see cref="NetworkDestination"/> is <see cref="NetworkDestination.PacketTarget"/>
+    /// </summary>
+    public TPacket SetTargetToSender()
+    {
+        Header.Target = Header.Sender;
+        return (TPacket)this;
+    }
 } 
 
 public abstract class NetworkPacket
 {
+    public PacketHeader Header;
+    
     internal SocketMessage Serialize(NetworkDestination destination)
     {
         var message = new SocketMessage();
+        
+        Header.PacketId = NetworkPacketRegistry.GetPacketId(GetType());
+        Header.Destination = destination;
 
-        var packetId = NetworkPacketRegistry.GetPacketId(GetType());
-
-        message.Write(packetId);
-        message.Write((byte)destination);
+        message.WritePacketHeader(Header);
         
         WriteData(message);
         

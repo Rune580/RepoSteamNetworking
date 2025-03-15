@@ -12,7 +12,7 @@ public class RepoNetworkingClient : MonoBehaviour
     public static RepoNetworkingClient Instance => _instance;
     
     private bool _clientActive;
-    private Lobby _currentLobby;
+    internal Lobby CurrentLobby { get; private set; }
     private RepoNetworkConnectionManager? _connectionManager;
     
     internal static void CreateSingleton(GameObject parent)
@@ -22,6 +22,8 @@ public class RepoNetworkingClient : MonoBehaviour
             Logging.Warn($"{nameof(RepoNetworkingClient)} already initialized!");
             return;
         }
+        
+        VersionCompatRegistry.InitRegistry();
         
         Instantiate(new GameObject("RepoNetworkingClient"), parent.transform)
             .AddComponent<RepoNetworkingClient>();
@@ -47,11 +49,12 @@ public class RepoNetworkingClient : MonoBehaviour
 
     public void ConnectToServer(Lobby lobby)
     {
-        _currentLobby = lobby;
+        CurrentLobby = lobby;
         _connectionManager = SteamNetworkingSockets.ConnectRelay<RepoNetworkConnectionManager>(lobby.Owner.Id);
         _clientActive = true;
         
         _connectionManager.SetLobby(lobby);
+        _connectionManager.StartHandshake();
     }
 
     public void DisconnectFromServer()

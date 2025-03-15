@@ -30,6 +30,8 @@ public class RepoNetworkingServer : MonoBehaviour
             return;
         }
         
+        VersionCompatRegistry.InitRegistry();
+        
         Instantiate(new GameObject("RepoNetworkingServer"), parent.transform)
             .AddComponent<RepoNetworkingServer>();
         
@@ -88,6 +90,23 @@ public class RepoNetworkingServer : MonoBehaviour
         {
             var result = connection.SendMessage(message.GetBytes());
         }
+    }
+
+    public void SendSocketMessageToTarget(SocketMessage message, SteamId target)
+    {
+        if (_socketManager is null)
+        {
+            Logging.Info("No server to send messages, can't send message!");
+            return;
+        }
+        
+        if (!_socketManager.TryGetConnectionBySteamId(target, out var connection))
+        {
+            Logging.Info($"No valid connection found for {target}!");
+            return;
+        }
+        
+        var result = connection.SendMessage(message.GetBytes());
     }
 
     internal bool VerifyHandshake(InitialHandshakePacket packet)

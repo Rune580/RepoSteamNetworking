@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using RepoSteamNetworking.API;
@@ -15,6 +16,7 @@ internal class RepoNetworkSocketManager : SocketManager
 {
     private readonly HashSet<uint> _verifiedConnectionIds = [];
     private readonly Dictionary<uint, Timer> _verificationTimers = new();
+    private readonly Dictionary<ulong, uint> _steamIdConnectionLut = new();
     
     public Action? OnClientConnected;
     
@@ -76,6 +78,19 @@ internal class RepoNetworkSocketManager : SocketManager
 
         _verifiedConnectionIds.Remove(connection.Id);
         StopVerificationTimer(connection.Id);
+
+        SteamId steamIdToRemove = default;
+        foreach (var (steamId, connectionId) in _steamIdConnectionLut)
+        {
+            if (connection.Id != connectionId)
+                continue;
+            
+            steamIdToRemove = steamId;
+            break;
+        }
+
+        if (steamIdToRemove.IsValid)
+            _steamIdConnectionLut.Remove(steamIdToRemove);
     }
 
     public override void OnMessage(Connection connection, NetIdentity identity, IntPtr data, int size, long messageNum, long recvTime, int channel)
@@ -89,12 +104,11 @@ internal class RepoNetworkSocketManager : SocketManager
         if (!_verifiedConnectionIds.Contains(connection.Id))
         {
             var message = new SocketMessage(bytes);
-            var packetId = message.Read<int>();
-            var destination = (NetworkDestination)message.Read<byte>();
+            var header = message.ReadPacketHeader();
             
-            var packet = NetworkPacketRegistry.CreatePacket(packetId);
+            var packet = NetworkPacketRegistry.CreatePacket(header.PacketId);
 
-            if (packet is not InitialHandshakePacket handshakePacket || destination != NetworkDestination.HostOnly)
+            if (packet is not InitialHandshakePacket handshakePacket || header.Destination != NetworkDestination.HostOnly)
             {
                 Logging.Warn($"Received {packet.GetType()} packet from an unverified connection! dropping packet...");
                 return;
@@ -109,14 +123,42 @@ internal class RepoNetworkSocketManager : SocketManager
                 _verifiedConnectionIds.Add(connection.Id);
                 StopVerificationTimer(connection.Id);
                 
+                _steamIdConnectionLut[handshakePacket.PlayerId] = connection.Id;
+                
                 Logging.Info($"Handshake successful! Connection {connection.Id} is now verified!");
+
+                SendHandshakeStatus(header.Sender, true);
                 
                 return;
             }
             
             Logging.Warn($"Handshake failed!\n\tConnection sent: {handshakePacket.DebugFormat()}\n\tExpected: ( LobbyId: {RepoNetworkingServer.Instance.CurrentLobby.Id}, AuthKey: {RepoNetworkingServer.Instance.AuthKey} )");
+            
+            SendHandshakeStatus(header.Sender, false);
         }
         
         RepoSteamNetwork.OnHostReceivedMessage(bytes);
+    }
+
+    private void SendHandshakeStatus(SteamId target, bool success)
+    {
+        var successPacket = new HandshakeStatusPacket
+        {
+            Success = success
+        };
+        successPacket.SetTarget(target);
+        RepoSteamNetwork.SendPacket(successPacket, NetworkDestination.PacketTarget);
+    }
+
+    public bool TryGetConnectionBySteamId(SteamId steamId, out Connection connection)
+    {
+        connection = default;
+
+        if (!_steamIdConnectionLut.TryGetValue(steamId, out var connectionId))
+            return false;
+
+        connection = Connected.FirstOrDefault(conn => conn.Id == connectionId);
+
+        return connection != 0;
     }
 }

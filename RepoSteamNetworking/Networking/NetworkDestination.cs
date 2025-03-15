@@ -14,4 +14,9 @@ public enum NetworkDestination
     /// All Clients, including the Host, will receive the packet
     /// </summary>
     Everyone = 2,
+    /// <summary>
+    /// Send to Target SteamId defined in the <see cref="RepoSteamNetworking.API.NetworkPacket"/> <see cref="RepoSteamNetworking.Networking.Packets.PacketHeader"/>.
+    /// If no target specified or the target is invalid, this packet will be dropped.
+    /// </summary>
+    PacketTarget = 3,
 }

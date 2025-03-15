@@ -60,8 +60,6 @@ internal class RepoNetworkConnectionManager : ConnectionManager
     public void SetLobby(Lobby lobby)
     {
         _currentLobby = lobby;
-        
-        StartHandshake();
     }
 
     // Send handshake packet to host to verify this connection is from a player who is actually in the lobby, and not 
