@@ -4,6 +4,28 @@ Heavily W.I.P. proper documentation along with nuget package will come closer to
 
 basic documentation is as follows
 
+### Set version compatibility
+
+#### Method A
+
+```csharp
+[RSNVersionCompatibility(VersionCompatibility.Strict, optional: false)] // Defaults
+[BepInPlugin(...)]
+class ExampleModPlugin : BaseUnityPlugin {...}
+```
+
+#### Method B
+
+```csharp
+class ExampleModPlugin : BaseUnityPlugin 
+{
+    private void Awake() 
+    {
+        RepoSteamNetwork.SetVersionCompatibility(VersionCompatibility.Strict, plugin: this);
+    }
+}
+```
+
 ### Create network packet
 ```csharp
 public class ExamplePacket : NetworkPacket<ExamplePacket>
@@ -37,7 +59,7 @@ Register callback
 ```csharp
 {
     ...
-    RepoSteamNetwork.RegisterCallback<ExamplePacket>(OnExamplePacketReceived);
+    RepoSteamNetwork.AddCallback<ExamplePacket>(OnExamplePacketReceived);
     ...
 }
 

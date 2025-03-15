@@ -16,8 +16,9 @@ internal static class PacketHandler
             return;
         }
         
-        // Send server the version registry of the client to verify mod compatibility.
+        Logging.Info("Successfully verified connection with server!");
         
+        // Send server the version registry of the client to verify mod compatibility.
         Logging.Info("Sending mod compat registry to server to verify mod list compatibility.");
         var registryPacket = VersionCompatRegistry.CreateRegistryPacket();
         RepoSteamNetwork.SendPacket(registryPacket, NetworkDestination.HostOnly);

@@ -28,8 +28,6 @@ internal class RepoNetworkSocketManager : SocketManager
     public override void OnConnecting(Connection connection, ConnectionInfo info)
     {
         base.OnConnecting(connection, info);
-        
-        Logging.Info($"{info.Identity} is connecting...");
 
         connection.Accept();
     }
@@ -38,7 +36,7 @@ internal class RepoNetworkSocketManager : SocketManager
     {
         base.OnConnected(connection, info);
         
-        Logging.Info($"{info.Identity} has connected!");
+        Logging.Info($"New connection {connection.Id}, waiting for verification");
         
         var handshakeTimer = new Timer(DropUnverifiedConnection, connection, TimeSpan.FromSeconds(10), TimeSpan.FromMilliseconds(-1));
         _verificationTimers[connection.Id] = handshakeTimer;
@@ -110,13 +108,11 @@ internal class RepoNetworkSocketManager : SocketManager
 
             if (packet is not InitialHandshakePacket handshakePacket || header.Destination != NetworkDestination.HostOnly)
             {
-                Logging.Warn($"Received {packet.GetType()} packet from an unverified connection! dropping packet...");
+                Logging.Warn($"Received {packet.GetType()} packet from an unverified connection {connection.Id}! dropping packet...");
                 return;
             }
 
             handshakePacket.Deserialize(message);
-            
-            Logging.Info(handshakePacket.DebugFormat(true));
             
             if (RepoNetworkingServer.Instance.VerifyHandshake(handshakePacket))
             {
@@ -125,7 +121,7 @@ internal class RepoNetworkSocketManager : SocketManager
                 
                 _steamIdConnectionLut[handshakePacket.PlayerId] = connection.Id;
                 
-                Logging.Info($"Handshake successful! Connection {connection.Id} is now verified!");
+                Logging.Info($"Handshake successful! Connection {connection.Id} is now verified as Client {handshakePacket.PlayerId.GetLobbyName()}!");
 
                 SendHandshakeStatus(header.Sender, true);
                 
