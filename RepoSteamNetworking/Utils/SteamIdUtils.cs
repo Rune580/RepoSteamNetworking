@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using RepoSteamNetworking.API;
 using Steamworks;
@@ -6,10 +7,14 @@ namespace RepoSteamNetworking.Utils;
 
 internal static class SteamIdUtils
 {
+    private static readonly Dictionary<ulong, string> CachedSteamIds = new();
+    
     public static string GetLobbyName(this SteamId steamId)
     {
+        if (CachedSteamIds.TryGetValue(steamId, out var cachedName))
+            return cachedName;
+        
         var lobby = RepoSteamNetwork.GetCurrentLobby();
-
         SteamFriends.RequestUserInformation(steamId);
 
         // Use NameHistory so we don't accidentally dox people who use nicknames to refer to their friends real names.
@@ -24,11 +29,8 @@ internal static class SteamIdUtils
         if (string.IsNullOrEmpty(name))
             return $"SteamId: {steamId.Value}";
         
+        CachedSteamIds[steamId] = name;
+        
         return name;
     }
-
-    // private static void SteamFriendsOnOnPersonaStateChange(Friend obj)
-    // {
-    //     throw new System.NotImplementedException();
-    // }
 }
