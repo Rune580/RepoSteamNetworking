@@ -1,5 +1,8 @@
 using System;
+using System.Linq;
 using System.Reflection;
+using BepInEx;
+using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
@@ -85,8 +88,6 @@ public static class RepoSteamNetwork
     public static void RegisterPacket<TPacket>()
         where TPacket : NetworkPacket<TPacket>
     {
-        var assembly = Assembly.GetCallingAssembly();
-        
         NetworkPacketRegistry.RegisterPacket(typeof(TPacket));
     }
 
@@ -102,6 +103,36 @@ public static class RepoSteamNetwork
     {
         var callbackHandler = MethodHandler.FromAction(callback);
         NetworkPacketRegistry.RemoveCallback<TPacket>(callbackHandler);
+    }
+
+    public static void SetVersionCompatibility(string modGuid, System.Version modVersion, VersionCompatibility compatibility, bool optional = false)
+    {
+        VersionCompatRegistry.RegisterMod(modGuid, modVersion, new RSNVersionCompatibilityAttribute(compatibility, optional));
+    }
+
+    public static void SetVersionCompatibility(VersionCompatibility compatibility, bool optional = false, BaseUnityPlugin? plugin = null)
+    {
+        BepInPlugin pluginInfo;
+        
+        if (plugin is null)
+        {
+            var assembly = Assembly.GetCallingAssembly();
+
+            var plugins = assembly.GetLoadableTypes()
+                .SelectMany(type => type.GetCustomAttributes<BepInPlugin>())
+                .ToArray();
+
+            if (plugins.Length != 1)
+                throw new InvalidOperationException($"Couldn't determine BepInPlugin from calling assembly! please set {nameof(plugin)} parameter.");
+            
+            pluginInfo = plugins[0];
+        }
+        else
+        {
+            pluginInfo = plugin.GetType().GetCustomAttribute<BepInPlugin>();
+        }
+
+        VersionCompatRegistry.RegisterMod(pluginInfo.GUID, pluginInfo.Version, new RSNVersionCompatibilityAttribute(compatibility, optional));
     }
 
     public static void SendPacket<TPacket>(TPacket packet, NetworkDestination destination = NetworkDestination.Everyone)

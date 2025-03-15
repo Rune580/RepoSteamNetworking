@@ -101,6 +101,10 @@ internal static class VersionCompatRegistry
                 
                 var info = infoAttributes[0];
 
+                // If mod registered using the API instead of the attribute, skip registering with the attribute.
+                if (ContainsEntry(info.GUID))
+                    continue;
+
                 var attributes = type.GetCustomAttributes<RSNVersionCompatibilityAttribute>().ToArray();
                 if (attributes.Length != 1)
                 {
