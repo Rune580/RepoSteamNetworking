@@ -74,6 +74,7 @@ public class RepoNetworkingServer : MonoBehaviour
     public void StopSocketServer()
     {
         _socketManager?.Close();
+        _socketManager?.Reset();
         _serverActive = false;
     }
 

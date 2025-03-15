@@ -161,4 +161,15 @@ internal class RepoNetworkSocketManager : SocketManager
 
         return connection != 0;
     }
+
+    public void Reset()
+    {
+        _verifiedConnectionIds.Clear();
+        _steamIdConnectionLut.Clear();
+
+        foreach (var (_, timer) in _verificationTimers)
+            timer.Dispose();
+        
+        _verificationTimers.Clear();
+    }
 }

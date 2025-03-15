@@ -107,10 +107,7 @@ internal static class VersionCompatRegistry
 
                 var attributes = type.GetCustomAttributes<RSNVersionCompatibilityAttribute>().ToArray();
                 if (attributes.Length != 1)
-                {
-                    // RegisterMod(info.GUID, info.Version, new RSNVersionCompatibilityAttribute());
                     continue;
-                }
 
                 var compatibilityAttribute = attributes[0];
                 
