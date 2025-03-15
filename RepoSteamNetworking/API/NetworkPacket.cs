@@ -9,20 +9,6 @@ namespace RepoSteamNetworking.API;
 public abstract class NetworkPacket<TPacket> : NetworkPacket
     where TPacket : NetworkPacket<TPacket>
 {
-    private static Action<TPacket>? _callback;
-
-    internal void RegisterCallback(Action<TPacket> callback)
-    {
-        _callback = callback;
-    }
-
-    internal override void InvokeCallback()
-    {
-        var packetCasted = (TPacket)this;
-        
-        _callback?.Invoke(packetCasted);
-    }
-
     /// <summary>
     /// Sets the target of this packet to be the SteamId of a user.
     /// Only used when <see cref="NetworkDestination"/> is <see cref="NetworkDestination.PacketTarget"/>
@@ -82,6 +68,4 @@ public abstract class NetworkPacket
     /// </summary>
     /// <param name="socketMessage"></param>
     protected abstract void ReadData(SocketMessage socketMessage);
-
-    internal abstract void InvokeCallback();
 }

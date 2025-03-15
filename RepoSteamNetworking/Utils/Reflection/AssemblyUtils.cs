@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace RepoSteamNetworking.Utils;
+namespace RepoSteamNetworking.Utils.Reflection;
 
 internal static class AssemblyUtils
 {

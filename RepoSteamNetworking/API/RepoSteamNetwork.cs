@@ -4,6 +4,7 @@ using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Utils;
+using RepoSteamNetworking.Utils.Reflection;
 using Steamworks;
 using Steamworks.Data;
 
@@ -33,7 +34,7 @@ public static class RepoSteamNetwork
         if (header.Destination == NetworkDestination.HostOnly)
         {
             packet.Deserialize(message);
-            packet.InvokeCallback();
+            NetworkPacketRegistry.InvokeCallbacks(packet);
             return;
         }
 
@@ -49,7 +50,7 @@ public static class RepoSteamNetwork
             if (header.Target == CurrentSteamId)
             {
                 packet.Deserialize(message);
-                packet.InvokeCallback();
+                NetworkPacketRegistry.InvokeCallbacks(packet);
                 return;
             }
         }
@@ -70,7 +71,7 @@ public static class RepoSteamNetwork
             return;
         
         packet.Deserialize(message);
-        packet.InvokeCallback();
+        NetworkPacketRegistry.InvokeCallbacks(packet);
     }
 
     internal static Lobby GetCurrentLobby()
@@ -89,11 +90,18 @@ public static class RepoSteamNetwork
         NetworkPacketRegistry.RegisterPacket(typeof(TPacket));
     }
 
-    public static void RegisterCallback<TPacket>(Action<TPacket> callback)
-        where TPacket : NetworkPacket<TPacket>, new()
+    public static void AddCallback<TPacket>(Action<TPacket> callback)
+        where TPacket : NetworkPacket<TPacket>
     {
-        var packet = new TPacket();
-        packet.RegisterCallback(callback);
+        var callbackHandler = MethodHandler.FromAction(callback);
+        NetworkPacketRegistry.AddCallback<TPacket>(callbackHandler);
+    }
+
+    public static void RemoveCallback<TPacket>(Action<TPacket> callback)
+        where TPacket : NetworkPacket<TPacket>
+    {
+        var callbackHandler = MethodHandler.FromAction(callback);
+        NetworkPacketRegistry.RemoveCallback<TPacket>(callbackHandler);
     }
 
     public static void SendPacket<TPacket>(TPacket packet, NetworkDestination destination = NetworkDestination.Everyone)
