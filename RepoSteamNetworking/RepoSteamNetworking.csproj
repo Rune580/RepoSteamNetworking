@@ -35,6 +35,10 @@
         <MinVerDefaultPreReleaseIdentifiers>dev</MinVerDefaultPreReleaseIdentifiers>
     </PropertyGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\RepoSteamNetworking.SourceGenerator\RepoSteamNetworking.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
     <!-- Project Nuget Packages -->
     <ItemGroup>
         <PackageReference Include="MinVer" Version="6.0.0">
