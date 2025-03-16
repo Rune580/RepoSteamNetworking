@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoSteamNetworking", "RepoSteamNetworking\RepoSteamNetworking.csproj", "{FF2A1065-4C06-4662-A035-5696A3C5D545}"
 EndProject
 Global

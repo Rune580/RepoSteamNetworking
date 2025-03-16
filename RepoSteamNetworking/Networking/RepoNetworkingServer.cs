@@ -16,7 +16,7 @@ public class RepoNetworkingServer : MonoBehaviour
 
     private bool _serverActive;
     internal Lobby CurrentLobby { get; private set; }
-    private RepoNetworkSocketManager? _socketManager;
+    internal RepoNetworkSocketManager? SocketManager { get; private set; }
     
     internal bool ServerActive => _instance is not null && _serverActive;
     
@@ -48,17 +48,17 @@ public class RepoNetworkingServer : MonoBehaviour
 
     private void Update()
     {
-        if (!_serverActive || _socketManager is null)
+        if (!_serverActive || SocketManager is null)
             return;
         
         // Just keep receiving data in an update loop?
-        _socketManager.Receive();
+        SocketManager.Receive();
     }
 
     public void StartSocketServer(Lobby lobby)
     {
         CurrentLobby = lobby;
-        _socketManager = SteamNetworkingSockets.CreateRelaySocket<RepoNetworkSocketManager>();
+        SocketManager = SteamNetworkingSockets.CreateRelaySocket<RepoNetworkSocketManager>();
         _serverActive = true;
         
         CreateAuthKeyForHandshake();
@@ -73,20 +73,20 @@ public class RepoNetworkingServer : MonoBehaviour
 
     public void StopSocketServer()
     {
-        _socketManager?.Close();
-        _socketManager?.Reset();
+        SocketManager?.Close();
+        SocketManager?.Reset();
         _serverActive = false;
     }
 
     public void SendSocketMessageToClients(SocketMessage message)
     {
-        if (_socketManager is null)
+        if (SocketManager is null)
         {
             Logging.Info("No server to send messages, can't send message!");
             return;
         }
         
-        var connected = _socketManager.Connected;
+        var connected = SocketManager.UserConnections;
         foreach (var connection in connected)
         {
             var result = connection.SendMessage(message.GetBytes());
@@ -95,13 +95,13 @@ public class RepoNetworkingServer : MonoBehaviour
 
     public void SendSocketMessageToTarget(SocketMessage message, SteamId target)
     {
-        if (_socketManager is null)
+        if (SocketManager is null)
         {
             Logging.Info("No server to send messages, can't send message!");
             return;
         }
         
-        if (!_socketManager.TryGetConnectionBySteamId(target, out var connection))
+        if (!SocketManager.TryGetSteamUserConnection(target, out var connection))
         {
             Logging.Info($"No valid connection found for {target}!");
             return;

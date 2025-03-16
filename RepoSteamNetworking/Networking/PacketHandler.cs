@@ -76,6 +76,11 @@ internal static class PacketHandler
         Logging.Info($"Sending mod compat response to client {clientName}.");
         responsePacket.SetTarget(packet.Header.Sender);
         RepoSteamNetwork.SendPacket(responsePacket, NetworkDestination.PacketTarget);
+
+        if (!RepoNetworkingServer.Instance.SocketManager!.TryGetSteamUserConnection(packet.Header.Sender, out var userConnection))
+            return;
+        
+        userConnection.SetValidated();
     }
 
     public static void OnServerModVersionRegistryReceived(ServerModVersionRegistryStatusPacket packet)
