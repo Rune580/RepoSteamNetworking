@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using RepoSteamNetworking.API;
 using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
+using RepoSteamNetworking.Networking.Unity;
 using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;

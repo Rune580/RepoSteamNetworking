@@ -6,6 +6,7 @@ using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
+using RepoSteamNetworking.Networking.Unity;
 using RepoSteamNetworking.Utils;
 using RepoSteamNetworking.Utils.Reflection;
 using Steamworks;
@@ -25,6 +26,8 @@ public static class RepoSteamNetwork
             return field;
         }
     }
+
+    private static readonly RPCMethodHelper RPCHelper = new();
 
     internal static void OnHostReceivedMessage(byte[] data)
     {
@@ -161,5 +164,26 @@ public static class RepoSteamNetwork
         {
             RepoNetworkingClient.Instance.SendSocketMessageToServer(message);
         }
+    }
+
+    public static void CallRPC(uint networkId, int subId, string methodName, params object[] parameters)
+    {
+        var packet = new CallRPCPacket
+        {
+            NetworkId = networkId,
+            SubId = subId,
+            MethodName = methodName,
+            Parameters = parameters
+        };
+        
+        SendPacket(packet);
+    }
+
+    internal static void InvokeRPC(uint networkId, int subId, string methodName, params object[] parameters)
+    {
+        var networkIdentity = RepoSteamNetworkManager.Instance.GetNetworkIdentity(networkId);
+        var subIdentity = networkIdentity.GetSubIdentity(subId);
+        
+        RPCHelper.InvokeRPC(subIdentity, methodName, parameters);
     }
 }

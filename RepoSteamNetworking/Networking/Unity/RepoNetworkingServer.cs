@@ -7,7 +7,7 @@ using Steamworks;
 using Steamworks.Data;
 using UnityEngine;
 
-namespace RepoSteamNetworking.Networking;
+namespace RepoSteamNetworking.Networking.Unity;
 
 public class RepoNetworkingServer : MonoBehaviour
 {

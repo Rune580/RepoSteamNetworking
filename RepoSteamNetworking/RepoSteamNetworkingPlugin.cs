@@ -34,5 +34,8 @@ public class RepoSteamNetworkingPlugin : BaseUnityPlugin
         
         RepoSteamNetwork.RegisterPacket<ServerModVersionRegistryStatusPacket>();
         RepoSteamNetwork.AddCallback<ServerModVersionRegistryStatusPacket>(PacketHandler.OnServerModVersionRegistryReceived);
+        
+        RepoSteamNetwork.RegisterPacket<CallRPCPacket>();
+        RepoSteamNetwork.AddCallback<CallRPCPacket>(PacketHandler.OnCallRPCPacketReceived);
     }
 }

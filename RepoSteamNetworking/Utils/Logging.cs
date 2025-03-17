@@ -111,4 +111,14 @@ internal static class Logging
         
         return builder.ToString();
     }
+
+    public static string DebugFormatArray<T>(this T[] array)
+    {
+        var builder = new StringBuilder();
+
+        foreach (var text in array)
+            builder.Append($"{text},");
+        
+        return builder.ToString().TrimEnd(',');
+    }
 }

@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
-using RepoSteamNetworking.Networking;
+using RepoSteamNetworking.Networking.Unity;
 using Steamworks;
 using Steamworks.Data;
 
@@ -14,6 +14,7 @@ public static class SteamManagerPatches
         // ReSharper disable once InconsistentNaming
         public static void Postfix(SteamManager __instance)
         {
+            RepoSteamNetworkManager.CreateSingleton(__instance.gameObject);
             RepoNetworkingServer.CreateSingleton(__instance.gameObject);
             RepoNetworkingClient.CreateSingleton(__instance.gameObject);
         }

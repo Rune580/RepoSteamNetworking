@@ -2,6 +2,7 @@ using System.Linq;
 using RepoSteamNetworking.API;
 using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking.Packets;
+using RepoSteamNetworking.Networking.Unity;
 using RepoSteamNetworking.Utils;
 
 namespace RepoSteamNetworking.Networking;
@@ -106,5 +107,10 @@ internal static class PacketHandler
         
         // Todo: in game prompt
         Logging.Warn("There's a mismatch in mods and or mod versions! You are responsible for any issues you may encounter!");
+    }
+
+    public static void OnCallRPCPacketReceived(CallRPCPacket packet)
+    {
+        RepoSteamNetwork.InvokeRPC(packet.NetworkId, packet.SubId, packet.MethodName, packet.Parameters);
     }
 }
