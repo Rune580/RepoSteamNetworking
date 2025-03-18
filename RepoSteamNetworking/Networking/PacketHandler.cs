@@ -1,8 +1,10 @@
 using System.Linq;
 using RepoSteamNetworking.API;
+using RepoSteamNetworking.API.Unity;
 using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Networking.Unity;
+using RepoSteamNetworking.Testing;
 using RepoSteamNetworking.Utils;
 
 namespace RepoSteamNetworking.Networking;
@@ -112,5 +114,31 @@ internal static class PacketHandler
     public static void OnCallRPCPacketReceived(CallRPCPacket packet)
     {
         RepoSteamNetwork.InvokeRPC(packet.NetworkId, packet.SubId, packet.MethodName, packet.Parameters);
+    }
+
+    public static void OnInstantiateNetworkedPrefabServerPacketReceived(InstantiateNetworkedPrefabServerPacket packet)
+    {
+        var networkId = RepoSteamNetworkManager.Instance.NewNetworkId;
+        var clientPacket = new InstantiateNetworkedPrefabClientPacket
+        {
+            NetworkId = networkId,
+        };
+        
+        RepoSteamNetwork.SendPacket(clientPacket, NetworkDestination.ClientsOnly);
+    }
+
+    public static void OnInstantiateNetworkedPrefabClientPacketReceived(InstantiateNetworkedPrefabClientPacket packet)
+    {
+#if DEBUG
+        Logging.Info($"Instantiating networked prefab! network id: {packet.NetworkId}, asset reference: {packet.Prefab.ToString()}");
+#endif
+        
+        // Todo get actual prefab using data from packet
+        var prefab = ExampleNetworkedPrefab.GetPrefab();
+
+        var identity = prefab.AddComponent<RepoSteamNetworkIdentity>();
+        identity.SetNetworkId(packet.NetworkId);
+        
+        prefab.SetActive(true);
     }
 }

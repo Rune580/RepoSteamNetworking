@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using RepoSteamNetworking.Networking.Unity;
@@ -13,14 +12,16 @@ public class RepoSteamNetworkIdentity : MonoBehaviour
     public uint NetworkId { get; private set; }
     public bool IsValid { get; private set; }
 
-    private readonly Dictionary<int, ISteamNetworkSubIdentity> _networkedBehaviours = new();
+    private readonly Dictionary<uint, ISteamNetworkSubIdentity> _networkedBehaviours = new();
+
+    private uint NextId => field++;
     
     private void Awake()
     {
         if (GetComponentsInChildren<RepoSteamNetworkIdentity>().Length > 1)
             Logging.Warn($"There should only be one {nameof(RepoSteamNetworkIdentity)} attached to a prefab! {gameObject.name} Has more than 1!");
 
-        foreach (var subIdentity in GetComponentsInChildren<MonoBehaviour>().OfType<ISteamNetworkSubIdentity>())
+        foreach (var subIdentity in GetComponentsInChildren<Component>().OfType<ISteamNetworkSubIdentity>())
             RegisterSubIdentity(subIdentity);
     }
 
@@ -49,24 +50,17 @@ public class RepoSteamNetworkIdentity : MonoBehaviour
     public void RegisterSubIdentity<T>(T target)
         where T : ISteamNetworkSubIdentity
     {
-        if (target is not MonoBehaviour component)
-            throw new InvalidOperationException();
+        // Don't register twice
+        if (target.IsValid && _networkedBehaviours.ContainsKey(target.SubId))
+            return;
         
-        var childParent = component.transform;
-        var childPath = childParent.name;
-
-        while (childParent != transform)
-        {
-            childParent = childParent.parent;
-            childPath = $"{childParent.name}/{childPath}";
-        }
-
-        target.SubId = childPath.GetHashCode();
+        target.SubId = NextId;
+        target.IsValid = true;
         
         _networkedBehaviours[target.SubId] = target;
     }
 
-    public ISteamNetworkSubIdentity GetSubIdentity(int subId)
+    public ISteamNetworkSubIdentity GetSubIdentity(uint subId)
     {
         return _networkedBehaviours[subId];
     }

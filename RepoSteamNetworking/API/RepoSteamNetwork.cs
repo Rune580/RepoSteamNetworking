@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using BepInEx;
+using RepoSteamNetworking.API.Asset;
 using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Networking.Data;
@@ -11,6 +12,7 @@ using RepoSteamNetworking.Utils;
 using RepoSteamNetworking.Utils.Reflection;
 using Steamworks;
 using Steamworks.Data;
+using UnityEngine;
 
 namespace RepoSteamNetworking.API;
 
@@ -166,7 +168,7 @@ public static class RepoSteamNetwork
         }
     }
 
-    public static void CallRPC(uint networkId, int subId, string methodName, params object[] parameters)
+    public static void CallRPC(uint networkId, uint subId, string methodName, params object[] parameters)
     {
         var packet = new CallRPCPacket
         {
@@ -179,11 +181,28 @@ public static class RepoSteamNetwork
         SendPacket(packet);
     }
 
-    internal static void InvokeRPC(uint networkId, int subId, string methodName, params object[] parameters)
+    internal static void InvokeRPC(uint networkId, uint subId, string methodName, params object[] parameters)
     {
         var networkIdentity = RepoSteamNetworkManager.Instance.GetNetworkIdentity(networkId);
         var subIdentity = networkIdentity.GetSubIdentity(subId);
         
         RPCHelper.InvokeRPC(subIdentity, methodName, parameters);
+    }
+    
+    public static void InstantiatePrefab(AssetReference prefab) => InstantiatePrefab(prefab, Vector3.zero, Quaternion.identity);
+    
+    public static void InstantiatePrefab(AssetReference prefab, Quaternion rotation) => InstantiatePrefab(prefab, Vector3.zero, rotation);
+
+    public static void InstantiatePrefab(AssetReference prefab, Vector3 position) => InstantiatePrefab(prefab, position, Quaternion.identity);
+    
+    public static void InstantiatePrefab(AssetReference prefab, Vector3 position, Quaternion rotation)
+    {
+        var packet = new InstantiateNetworkedPrefabServerPacket
+        {
+            Prefab = prefab,
+            Position = position,
+            Rotation = rotation
+        };
+        SendPacket(packet, NetworkDestination.HostOnly);
     }
 }

@@ -68,11 +68,13 @@ public class RPCMethodGenerator : IIncrementalGenerator
             code.AppendLine($"partial class {classMethods[0].ClassName} : ISteamNetworkSubIdentity\n{{");
 
             code.AppendLine($$"""
-                              public int SubId { get; set; }
+                              public uint SubId { get; set; }
+                              
+                              public bool IsValid { get; set; }
                               
                               private {{NetworkIdentityClassName}} _networkIdentity;
 
-                              private {{NetworkIdentityClassName}} GetNetworkIdentity()
+                              public {{NetworkIdentityClassName}} GetNetworkIdentity()
                               {
                                   if (!_networkIdentity)
                                   {

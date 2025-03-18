@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using RepoSteamNetworking.API.Unity;
 using RepoSteamNetworking.Utils;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace RepoSteamNetworking.Networking.Unity;
 
@@ -9,9 +10,10 @@ public class RepoSteamNetworkManager : MonoBehaviour
 {
     private static RepoSteamNetworkManager? _instance;
     public static RepoSteamNetworkManager Instance => _instance;
-
+    
     private readonly Dictionary<uint, RepoSteamNetworkIdentity> _networkObjects = new();
-    private uint NextId => field++;
+    
+    internal uint NewNetworkId => field++;
     
     private void Awake()
     {
@@ -21,9 +23,22 @@ public class RepoSteamNetworkManager : MonoBehaviour
         DontDestroyOnLoad(this);
     }
 
+    private void Update()
+    {
+        if (Keyboard.current.hKey.wasPressedThisFrame)
+        {
+            if (!RepoNetworkingServer.Instance.ServerActive)
+                return;
+
+            // RepoSteamNetwork.InstantiatePrefab();
+        }
+    }
+
     public void RegisterNetworkIdentity(RepoSteamNetworkIdentity networkIdentity)
     {
-        networkIdentity.SetNetworkId(NextId);
+        if (!networkIdentity.IsValid)
+            return;
+        
         _networkObjects[networkIdentity.NetworkId] = networkIdentity;
     }
 
@@ -48,7 +63,7 @@ public class RepoSteamNetworkManager : MonoBehaviour
         VersionCompatRegistry.InitRegistry();
         
         Instantiate(new GameObject("RepoSteamNetworkManager"), parent.transform)
-            .AddComponent<RepoNetworkingServer>();
+            .AddComponent<RepoSteamNetworkManager>();
         
         Logging.Info("Created RepoSteamNetworkManager");
     }

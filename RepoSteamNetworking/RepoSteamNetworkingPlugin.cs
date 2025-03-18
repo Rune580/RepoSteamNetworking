@@ -37,5 +37,11 @@ public class RepoSteamNetworkingPlugin : BaseUnityPlugin
         
         RepoSteamNetwork.RegisterPacket<CallRPCPacket>();
         RepoSteamNetwork.AddCallback<CallRPCPacket>(PacketHandler.OnCallRPCPacketReceived);
+
+        RepoSteamNetwork.RegisterPacket<InstantiateNetworkedPrefabServerPacket>();
+        RepoSteamNetwork.AddCallback<InstantiateNetworkedPrefabServerPacket>(PacketHandler.OnInstantiateNetworkedPrefabServerPacketReceived);
+        
+        RepoSteamNetwork.RegisterPacket<InstantiateNetworkedPrefabClientPacket>();
+        RepoSteamNetwork.AddCallback<InstantiateNetworkedPrefabClientPacket>(PacketHandler.OnInstantiateNetworkedPrefabClientPacketReceived);
     }
 }

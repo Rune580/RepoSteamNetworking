@@ -1,18 +1,24 @@
 using RepoSteamNetworking.API.Unity;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using Random = UnityEngine.Random;
 
 namespace RepoSteamNetworking.Testing;
 
 public partial class ExampleBehaviour : MonoBehaviour
 {
     [RepoSteamRPC]
-    public void SendDataRPC(Vector3 position)
+    public void DoExampleRPC(string message, Vector3 position)
     {
-        
+        Debug.Log($"Got message: {message}");
+        Debug.Log($"Got position: {position}");
     }
 
-    private void Awake()
+    private void Update()
     {
-        // GetNetworkIdentity().
+        if (Keyboard.current.bKey.wasPressedThisFrame)
+        {
+            DoExample("Hello Mario", Random.insideUnitSphere);
+        }
     }
 }

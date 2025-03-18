@@ -96,7 +96,7 @@ internal class CodeBuilder
         return code.ToString();
     }
 
-    public SourceText ToSourceText(Encoding? encoding = null)
+    public SourceText ToSourceText(Encoding encoding = null)
     {
         encoding ??= Encoding.UTF8;
         

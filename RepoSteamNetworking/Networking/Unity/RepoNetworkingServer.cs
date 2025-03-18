@@ -68,7 +68,7 @@ public class RepoNetworkingServer : MonoBehaviour
     {
         // Create a unique key and store it in the lobby, this requires clients to be a member of the lobby in order to access the key.
         var guid = Guid.NewGuid();
-        CurrentLobby.SetMemberData("RSN_Auth_Key", guid.ToString());
+        CurrentLobby.SetMemberData("RSN_Auth_Key", guid.ToString()); // TODO create unique key for each client connection and remove key after verification
     }
 
     public void StopSocketServer()
