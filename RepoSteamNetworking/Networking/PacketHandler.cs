@@ -13,6 +13,8 @@ internal static class PacketHandler
 {
     public static void OnHandshakeStatusReceived(HandshakeStatusPacket packet)
     {
+        RepoNetworkingClient.Instance.SetConnectionVerified(packet.Success);
+        
         if (!packet.Success)
         {
             Logging.Error("Failed to verify with server! Either something has gone terribly wrong, or steam is down!");

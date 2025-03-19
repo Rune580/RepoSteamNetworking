@@ -24,7 +24,9 @@ public class RepoSteamNetworkingPlugin : BaseUnityPlugin
 
     private void RegisterPackets()
     {
-        RepoSteamNetwork.RegisterPacket<InitialHandshakePacket>();
+        RepoSteamNetwork.RegisterPacket<HandshakeStartAuthPacket>();
+        
+        RepoSteamNetwork.RegisterPacket<HandshakeAuthConnectionPacket>();
         
         RepoSteamNetwork.RegisterPacket<HandshakeStatusPacket>();
         RepoSteamNetwork.AddCallback<HandshakeStatusPacket>(PacketHandler.OnHandshakeStatusReceived);

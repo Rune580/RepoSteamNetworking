@@ -1,5 +1,9 @@
 using System;
+using System.Linq;
 using System.Timers;
+using RepoSteamNetworking.API;
+using RepoSteamNetworking.Networking.Packets;
+using RepoSteamNetworking.Networking.Unity;
 using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;
@@ -8,8 +12,8 @@ namespace RepoSteamNetworking.Networking;
 
 internal class SteamUserConnection : IEquatable<SteamUserConnection>
 {
+    private string _clientKey = "";
     private Connection _connection;
-    
     private readonly Timer _timer;
 
     public uint ConnectionId => _connection.Id;
@@ -41,6 +45,18 @@ internal class SteamUserConnection : IEquatable<SteamUserConnection>
 
     public void StartVerification()
     {
+        _clientKey = RepoNetworkingServer.Instance.CreateAuthKey();
+
+        var packet = new HandshakeStartAuthPacket
+        {
+            ClientKey = _clientKey
+        };
+
+        packet.Header.Sender = RepoSteamNetwork.CurrentSteamId;
+        var message = packet.Serialize(NetworkDestination.Everyone); // Destination doesn't matter, the packet will be intercepted before it's processed.
+
+        _connection.SendMessage(message.GetBytes());
+            
         _timer.Elapsed += OnHandshakeTimeout;
         _timer.Start();
         
@@ -55,12 +71,32 @@ internal class SteamUserConnection : IEquatable<SteamUserConnection>
         Logging.Info($"Waiting for Client {UserName} to validate mod list compatibility...");
     }
 
+    public bool VerifyAuth(HandshakeAuthConnectionPacket packet)
+    {
+        var lobby = RepoNetworkingServer.Instance.CurrentLobby;
+
+        var authKey = lobby.GetMemberData(lobby.Owner, _clientKey);
+        
+        if (string.IsNullOrWhiteSpace(authKey) || authKey != packet.AuthKey)
+            return false;
+        
+        if (lobby.Id != packet.LobbyId)
+            return false;
+
+        if (lobby.Members.Any(member => member.Id == packet.PlayerId))
+            return true;
+        
+        return false;
+    }
+
     public void SetVerifiedWithSteamId(SteamId steamId)
     {
         SteamId = steamId;
         Status = ConnectionStatus.Verified;
         
         Logging.Info($"Connection {ConnectionId} is now verified as Client {UserName}!");
+        
+        RepoNetworkingServer.Instance.RemoveAuthKey(_clientKey);
 
         _timer.Elapsed -= OnHandshakeTimeout;
         _timer.Stop();
@@ -84,6 +120,8 @@ internal class SteamUserConnection : IEquatable<SteamUserConnection>
         _timer.Stop();
         
         Logging.Warn($"Connection {ConnectionId} failed to verify in time, dropping connection...");
+        
+        RepoNetworkingServer.Instance.RemoveAuthKey(_clientKey);
         
         DropConnection();
     }

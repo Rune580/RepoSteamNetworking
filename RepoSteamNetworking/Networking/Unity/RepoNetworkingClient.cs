@@ -54,7 +54,6 @@ public class RepoNetworkingClient : MonoBehaviour
         _clientActive = true;
         
         _connectionManager.SetLobby(lobby);
-        _connectionManager.StartHandshake();
     }
 
     public void DisconnectFromServer()
@@ -74,5 +73,13 @@ public class RepoNetworkingClient : MonoBehaviour
         var result = _connectionManager.Connection.SendMessage(message.GetBytes());
         
         // Logging.Info($"[SendMessageToServer] Result: {result}");
+    }
+
+    public void SetConnectionVerified(bool verified)
+    {
+        if (_connectionManager is null)
+            return;
+        
+        _connectionManager.Verified = verified;
     }
 }

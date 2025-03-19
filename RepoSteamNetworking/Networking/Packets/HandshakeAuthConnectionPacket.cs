@@ -5,17 +5,17 @@ using Steamworks.Data;
 
 namespace RepoSteamNetworking.Networking.Packets;
 
-internal class InitialHandshakePacket : NetworkPacket<InitialHandshakePacket>
+internal class HandshakeAuthConnectionPacket : NetworkPacket<HandshakeAuthConnectionPacket>
 {
     public SteamId LobbyId { get; private set; }
     public SteamId PlayerId { get; private set; }
     public string AuthKey { get; private set; } = string.Empty;
 
-    internal void SetData(Lobby lobby)
+    internal void SetData(Lobby lobby, string clientKey)
     {
         LobbyId = lobby.Id;
         PlayerId = SteamClient.SteamId;
-        AuthKey = lobby.GetMemberData(lobby.Owner, "RSN_Auth_Key");
+        AuthKey = lobby.GetMemberData(lobby.Owner, clientKey);
     }
     
     protected override void WriteData(SocketMessage socketMessage)

@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RepoSteamNetworking.API;
+using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Utils;
 using Steamworks;
@@ -11,6 +12,7 @@ namespace RepoSteamNetworking.Networking;
 internal class RepoNetworkConnectionManager : ConnectionManager
 {
     private Lobby _currentLobby;
+    internal bool Verified;
     
     public RepoNetworkConnectionManager()
     {
@@ -47,6 +49,36 @@ internal class RepoNetworkConnectionManager : ConnectionManager
         
         var bytes = new byte[size];
         Marshal.Copy(data, bytes, 0, size);
+
+        if (!Verified)
+        {
+            var message = new SocketMessage(bytes);
+            var header = message.ReadPacketHeader();
+            
+            var packet = NetworkPacketRegistry.CreatePacket(header.PacketId);
+
+            if (packet is HandshakeStatusPacket)
+            {
+                RepoSteamNetwork.OnClientMessageReceived(bytes);
+                return;
+            }
+
+            if (packet is not HandshakeStartAuthPacket startAuthPacket)
+            {
+                Logging.Warn($"Expected {nameof(HandshakeStartAuthPacket)} from Server but got {packet.GetType()} instead!");
+                return;
+            }
+
+            startAuthPacket.Deserialize(message);
+            
+            Logging.Info("Sending handshake to server to verify connection!");
+            
+            var handshakePacket = new HandshakeAuthConnectionPacket();
+            handshakePacket.SetData(_currentLobby, startAuthPacket.ClientKey);
+            RepoSteamNetwork.SendPacket(handshakePacket, NetworkDestination.HostOnly);
+            
+            return;
+        }
         
         RepoSteamNetwork.OnClientMessageReceived(bytes);
     }
@@ -54,16 +86,5 @@ internal class RepoNetworkConnectionManager : ConnectionManager
     public void SetLobby(Lobby lobby)
     {
         _currentLobby = lobby;
-    }
-
-    // Send handshake packet to host to verify this connection is from a player who is actually in the lobby, and not 
-    // a potentially malicious user attempting to connect from outside the lobby.
-    public void StartHandshake()
-    {
-        Logging.Info("Sending handshake to server to verify connection!");
-        
-        var handshakePacket = new InitialHandshakePacket();
-        handshakePacket.SetData(_currentLobby);
-        RepoSteamNetwork.SendPacket(handshakePacket, NetworkDestination.HostOnly);
     }
 }

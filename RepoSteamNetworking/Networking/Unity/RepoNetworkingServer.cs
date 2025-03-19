@@ -1,7 +1,5 @@
 using System;
-using System.Linq;
 using RepoSteamNetworking.Networking.Data;
-using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;
@@ -20,7 +18,7 @@ public class RepoNetworkingServer : MonoBehaviour
     
     internal bool ServerActive => _instance is not null && _serverActive;
     
-    internal string AuthKey => CurrentLobby.GetMemberData(CurrentLobby.Owner, "RSN_Auth_Key");
+    // internal string AuthKey => CurrentLobby.GetMemberData(CurrentLobby.Owner, "RSN_Auth_Key");
     
     internal static void CreateSingleton(GameObject parent)
     {
@@ -51,7 +49,6 @@ public class RepoNetworkingServer : MonoBehaviour
         if (!_serverActive || SocketManager is null)
             return;
         
-        // Just keep receiving data in an update loop?
         SocketManager.Receive();
     }
 
@@ -61,15 +58,21 @@ public class RepoNetworkingServer : MonoBehaviour
         SocketManager = SteamNetworkingSockets.CreateRelaySocket<RepoNetworkSocketManager>();
         _serverActive = true;
         
-        CreateAuthKeyForHandshake();
+        // CreateAuthKeyForHandshake();
     }
 
-    public void CreateAuthKeyForHandshake()
+    public string CreateAuthKey()
     {
         // Create a unique key and store it in the lobby, this requires clients to be a member of the lobby in order to access the key.
-        var guid = Guid.NewGuid();
-        CurrentLobby.SetMemberData("RSN_Auth_Key", guid.ToString()); // TODO create unique key for each client connection and remove key after verification
+        var serverAuthKey = Guid.NewGuid().ToString();
+
+        var clientKey = $"RSN_{Guid.NewGuid().ToString()}";
+        CurrentLobby.SetMemberData(clientKey, serverAuthKey);
+
+        return clientKey;
     }
+
+    public void RemoveAuthKey(string clientKey) => CurrentLobby.SetMemberData(clientKey, string.Empty);
 
     public void StopSocketServer()
     {
@@ -108,19 +111,5 @@ public class RepoNetworkingServer : MonoBehaviour
         }
         
         var result = connection.SendMessage(message.GetBytes());
-    }
-
-    internal bool VerifyHandshake(InitialHandshakePacket packet)
-    {
-        if (AuthKey != packet.AuthKey)
-            return false;
-        
-        if (CurrentLobby.Id != packet.LobbyId)
-            return false;
-
-        if (CurrentLobby.Members.Any(member => member.Id == packet.PlayerId))
-            return true;
-        
-        return false;
     }
 }

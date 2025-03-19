@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using RepoSteamNetworking.API;
 using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
-using RepoSteamNetworking.Networking.Unity;
 using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;
@@ -123,7 +122,7 @@ internal class RepoNetworkSocketManager : SocketManager
             
             var packet = NetworkPacketRegistry.CreatePacket(header.PacketId);
 
-            if (packet is not InitialHandshakePacket handshakePacket || header.Destination != NetworkDestination.HostOnly)
+            if (packet is not HandshakeAuthConnectionPacket handshakePacket || header.Destination != NetworkDestination.HostOnly)
             {
                 Logging.Warn($"Received {packet.GetType()} packet from an unverified connection {connection.Id}! dropping packet...");
                 return;
@@ -131,7 +130,7 @@ internal class RepoNetworkSocketManager : SocketManager
 
             handshakePacket.Deserialize(message);
             
-            if (RepoNetworkingServer.Instance.VerifyHandshake(handshakePacket))
+            if (userConnection.VerifyAuth(handshakePacket))
             {
                 userConnection.SetVerifiedWithSteamId(handshakePacket.PlayerId);
                 var index = _steamUserConnections.IndexOf(userConnection);
@@ -143,7 +142,7 @@ internal class RepoNetworkSocketManager : SocketManager
                 return;
             }
             
-            Logging.Warn($"Handshake failed!\n\tConnection sent: {handshakePacket.DebugFormat()}\n\tExpected: ( LobbyId: {RepoNetworkingServer.Instance.CurrentLobby.Id}, AuthKey: {RepoNetworkingServer.Instance.AuthKey} )");
+            Logging.Warn($"Handshake failed!");
             
             SendHandshakeStatus(header.Sender, false);
             return;
