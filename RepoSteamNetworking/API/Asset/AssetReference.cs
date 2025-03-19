@@ -9,6 +9,15 @@ public struct AssetReference
     public string bundleName;
     public string assetPath;
 
+    public AssetReference(AssetBundleReference bundleRef, string assetPath)
+    {
+        modNamespace = bundleRef.modNamespace;
+        bundleName = bundleRef.bundleName;
+        this.assetPath = assetPath;
+    }
+
+    public AssetBundleReference BundleReference => (modNamespace, bundleName);
+
     public override string ToString() => $"{modNamespace}:{bundleName}:{assetPath}";
     
     public static implicit operator AssetReference(string reference)

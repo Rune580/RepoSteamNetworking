@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace RepoSteamNetworking.Utils.Reflection;
+namespace RepoSteamNetworking.Utils;
 
 internal class MethodHandler : IEquatable<MethodHandler>
 {

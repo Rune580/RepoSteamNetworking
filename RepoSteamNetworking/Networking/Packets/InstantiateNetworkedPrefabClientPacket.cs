@@ -9,13 +9,27 @@ internal class InstantiateNetworkedPrefabClientPacket : NetworkPacket<Instantiat
 {
     public uint NetworkId { get; set; }
     public AssetReference Prefab { get; set; }
+    public bool HasTarget { get; private set; }
+    public NetworkTransform TargetTransform { get; private set; }
     public Vector3 Position { get; set; }
     public Quaternion Rotation { get; set; }
+
+    public void WithServerData(InstantiateNetworkedPrefabServerPacket serverData)
+    {
+        Prefab = serverData.Prefab;
+        HasTarget = serverData.HasTarget;
+        TargetTransform = serverData.TargetTransform;
+        Position = serverData.Position;
+        Rotation = serverData.Rotation;
+    }
     
     protected override void WriteData(SocketMessage socketMessage)
     {
         socketMessage.Write(NetworkId);
         socketMessage.Write(Prefab);
+        socketMessage.Write(HasTarget);
+        if (HasTarget)
+            socketMessage.Write(TargetTransform);
         socketMessage.Write(Position);
         socketMessage.Write(Rotation);
     }
@@ -24,6 +38,9 @@ internal class InstantiateNetworkedPrefabClientPacket : NetworkPacket<Instantiat
     {
         NetworkId = socketMessage.Read<uint>();
         Prefab = socketMessage.Read<AssetReference>();
+        HasTarget = socketMessage.Read<bool>();
+        if (HasTarget)
+            TargetTransform = socketMessage.Read<NetworkTransform>();
         Position = socketMessage.Read<Vector3>();
         Rotation = socketMessage.Read<Quaternion>();
     }

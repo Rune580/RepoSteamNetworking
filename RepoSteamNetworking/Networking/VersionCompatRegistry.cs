@@ -6,7 +6,6 @@ using BepInEx;
 using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Utils;
-using RepoSteamNetworking.Utils.Reflection;
 
 namespace RepoSteamNetworking.Networking;
 

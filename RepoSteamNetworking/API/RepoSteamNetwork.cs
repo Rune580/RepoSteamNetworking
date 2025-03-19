@@ -9,7 +9,6 @@ using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Networking.Unity;
 using RepoSteamNetworking.Utils;
-using RepoSteamNetworking.Utils.Reflection;
 using Steamworks;
 using Steamworks.Data;
 using UnityEngine;
@@ -195,7 +194,15 @@ public static class RepoSteamNetwork
 
     public static void InstantiatePrefab(AssetReference prefab, Vector3 position) => InstantiatePrefab(prefab, position, Quaternion.identity);
     
-    public static void InstantiatePrefab(AssetReference prefab, Vector3 position, Quaternion rotation)
+    public static void InstantiatePrefab(AssetReference prefab, Vector3 position, Quaternion rotation) => InstantiatePrefab(prefab, null,  position, rotation);
+    
+    public static void InstantiatePrefab(AssetReference prefab, Transform target) => InstantiatePrefab(prefab, target, Vector3.zero, Quaternion.identity);
+    
+    public static void InstantiatePrefab(AssetReference prefab, Transform target, Vector3 position) => InstantiatePrefab(prefab, target, position, Quaternion.identity);
+    
+    public static void InstantiatePrefab(AssetReference prefab, Transform target, Quaternion rotation) => InstantiatePrefab(prefab, target, Vector3.zero, rotation);
+    
+    public static void InstantiatePrefab(AssetReference prefab, Transform? target, Vector3 position, Quaternion rotation)
     {
         var packet = new InstantiateNetworkedPrefabServerPacket
         {
@@ -203,6 +210,40 @@ public static class RepoSteamNetwork
             Position = position,
             Rotation = rotation
         };
+        
+        packet.SetTargetTransform(target);
+        
         SendPacket(packet, NetworkDestination.HostOnly);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="assetBundle">AssetBundle containing the prefabs to register.</param>
+    /// <param name="modGuid">GUID of the mod the AssetBundle belongs to. Tries to detect GUID automatically if left unset.</param>
+    /// <param name="bundleName">Sets the name the AssetBundle will referenced by. Set to the name property of the AssetBundle if left unset.</param>
+    /// <returns></returns>
+    public static AssetBundleReference RegisterAssetBundle(AssetBundle assetBundle, string modGuid = "", string bundleName = "")
+    {
+        // Set bundleName to name of assetBundle if not already set.
+        if (string.IsNullOrWhiteSpace(bundleName))
+            bundleName = assetBundle.name;
+        
+        // Try and get the modGuid from the calling assembly.
+        if (string.IsNullOrWhiteSpace(modGuid))
+        {
+            var pluginInfo = Assembly.GetCallingAssembly()
+                .GetPluginInfoFromAssembly();
+
+            if (pluginInfo is null)
+            {
+                Logging.Error($"Failed to register AssetBundle {bundleName}!\n\tPlease pass in your mods GUID with the `modGuid` parameter!");
+                return default;
+            }
+            
+            modGuid = pluginInfo.GUID;
+        }
+        
+        return NetworkAssetDatabase.RegisterAssetBundle(assetBundle, modGuid, bundleName, false);
     }
 }
