@@ -125,8 +125,12 @@ internal static class PacketHandler
         };
         
         clientPacket.WithServerData(packet);
+
+#if DEBUG
+        Logging.Info("Telling clients to Instantiate Prefabs");
+#endif
         
-        RepoSteamNetwork.SendPacket(clientPacket, NetworkDestination.ClientsOnly);
+        RepoSteamNetwork.SendPacket(clientPacket);
     }
 
     public static void OnInstantiateNetworkedPrefabClientPacketReceived(InstantiateNetworkedPrefabClientPacket packet)

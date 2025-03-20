@@ -39,6 +39,12 @@
         <ProjectReference Include="..\RepoSteamNetworking.SourceGenerator\RepoSteamNetworking.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="AssetBundles\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
     <!-- Project Nuget Packages -->
     <ItemGroup>
         <PackageReference Include="MinVer" Version="6.0.0">

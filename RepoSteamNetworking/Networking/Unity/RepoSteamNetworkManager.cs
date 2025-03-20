@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using RepoSteamNetworking.API;
 using RepoSteamNetworking.API.Asset;
 using RepoSteamNetworking.API.Unity;
 using RepoSteamNetworking.Networking.Data;
@@ -32,7 +33,12 @@ public class RepoSteamNetworkManager : MonoBehaviour
             if (!RepoNetworkingServer.Instance.ServerActive)
                 return;
 
-            // RepoSteamNetwork.InstantiatePrefab();
+            var player = PlayerAvatar.instance;
+            var pos = player.transform.position;
+
+            var prefab = RepoSteamNetworkingPlugin.TestBundle.GetAssetReference("assets/Example Object.prefab");
+
+            RepoSteamNetwork.InstantiatePrefab(prefab, pos);
         }
     }
 
@@ -70,6 +76,7 @@ public class RepoSteamNetworkManager : MonoBehaviour
         
         networkIdentity.SetNetworkId(networkId);
         instance.SetActive(wasPrefabActive);
+        prefab.SetActive(wasPrefabActive);
     }
 
     internal void InstantiateNetworkPrefab(uint networkId, AssetReference assetRef, NetworkTransform targetTransform, Vector3 position, Quaternion rotation)
@@ -101,6 +108,7 @@ public class RepoSteamNetworkManager : MonoBehaviour
         
         networkIdentity.SetNetworkId(networkId);
         instance.SetActive(wasPrefabActive);
+        prefab.SetActive(wasPrefabActive);
     }
     
     internal static void CreateSingleton(GameObject parent)

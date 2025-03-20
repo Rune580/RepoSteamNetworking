@@ -20,6 +20,8 @@ internal static class NetworkAssetDatabase
             Managed = managed
         };
         
+        Logging.Info($"Registered Networked AssetBundle {bundleRef.ToString()}!");
+        
         return bundleRef;
     }
 
