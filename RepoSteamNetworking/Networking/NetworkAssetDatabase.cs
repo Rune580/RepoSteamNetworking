@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using RepoSteamNetworking.API.Asset;
 using RepoSteamNetworking.Utils;
 using UnityEngine;
@@ -50,6 +51,16 @@ internal static class NetworkAssetDatabase
             return null;
 
         return networkBundle.Bundle.LoadAssetAsync<T>(assetRef.assetPath);
+    }
+
+    public static IEnumerable<AssetReference> GetAllAssets(AssetBundleReference bundleRef)
+    {
+        var networkBundle = AssetBundles[bundleRef];
+        var bundle = networkBundle.Bundle;
+
+        var assetPaths = bundle.GetAllAssetNames();
+
+        return assetPaths.Select(path => bundleRef.GetAssetReference(path));
     }
 
     private struct NetworkAssetBundle

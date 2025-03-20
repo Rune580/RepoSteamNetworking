@@ -1,4 +1,7 @@
 using System;
+using RepoSteamNetworking.Networking;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace RepoSteamNetworking.API.Asset;
 
@@ -17,6 +20,18 @@ public struct AssetReference
     }
 
     public AssetBundleReference BundleReference => (modNamespace, bundleName);
+
+    public T? LoadAsset<T>()
+        where T : Object
+    {
+        return NetworkAssetDatabase.LoadAsset<T>(this);
+    }
+
+    public AssetBundleRequest? LoadAssetAsync<T>()
+        where T : Object
+    {
+        return NetworkAssetDatabase.LoadAssetAsync<T>(this);
+    }
 
     public override string ToString() => $"{modNamespace}:{bundleName}:{assetPath}";
     
