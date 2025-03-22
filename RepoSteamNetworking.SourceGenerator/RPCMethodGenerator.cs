@@ -25,6 +25,8 @@ public class RPCMethodGenerator : IIncrementalGenerator
             },
             transform: (syntaxContext, token) =>
             {
+                var rpcTarget = syntaxContext.Attributes[0].ConstructorArguments[0];
+                
                 var containingClass = syntaxContext.TargetSymbol.ContainingType;
                 
                 var methodName = syntaxContext.TargetSymbol.Name;
@@ -36,7 +38,8 @@ public class RPCMethodGenerator : IIncrementalGenerator
                     containingClass.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted)),
                     containingClass.Name,
                     methodName,
-                    parameterSymbols
+                    parameterSymbols,
+                    rpcTarget
                 );
             }
         );
@@ -134,14 +137,14 @@ public class RPCMethodGenerator : IIncrementalGenerator
                                }
                                
                                var networkId = networkIdentity.NetworkId;
-                               RepoSteamNetwork.CallRPC(networkId, SubId, nameof({{rpcMethodContext.MethodName}}), {{paramNames}});
+                               RepoSteamNetwork.CallRPC({{rpcMethodContext.RPCTarget.Value}}, networkId, SubId, nameof({{rpcMethodContext.MethodName}}), {{paramNames}});
                            }
                            """;
         
         return methodCode;
     }
 
-    private struct RpcMethodContext(string @namespace, string className, string methodName, IParameterSymbol[] parameters)
+    private struct RpcMethodContext(string @namespace, string className, string methodName, IParameterSymbol[] parameters, TypedConstant rpcTarget)
     {
         public string Namespace = @namespace;
         public string ClassName = className;
@@ -149,6 +152,7 @@ public class RPCMethodGenerator : IIncrementalGenerator
         // public string[] Parameters = parameters;
         
         public IParameterSymbol[] Parameters = parameters;
+        public TypedConstant RPCTarget = rpcTarget;
         
         public string FullClassName => $"{Namespace}.{ClassName}";
     }

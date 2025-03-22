@@ -3,7 +3,7 @@ namespace RepoSteamNetworking.Networking;
 public enum NetworkDestination
 {
     /// <summary>
-    /// Only the host will receive the packet
+    /// Only the host will receive the packet.
     /// </summary>
     HostOnly = 0,
     /// <summary>
@@ -11,7 +11,7 @@ public enum NetworkDestination
     /// </summary>
     ClientsOnly = 1,
     /// <summary>
-    /// All Clients, including the Host, will receive the packet
+    /// All Clients, including the Host, will receive the packet.
     /// </summary>
     Everyone = 2,
     /// <summary>

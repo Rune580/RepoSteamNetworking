@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using BepInEx;
 using RepoSteamNetworking.API.Asset;
+using RepoSteamNetworking.API.Unity;
 using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Networking.Data;
@@ -167,7 +168,10 @@ public static class RepoSteamNetwork
         }
     }
 
-    public static void CallRPC(uint networkId, uint subId, string methodName, params object[] parameters)
+    public static void CallRPC(RPCTarget target, uint networkId, uint subId, string methodName,
+        params object[] parameters) => CallRPC((int)target, networkId, subId, methodName, parameters);
+
+    public static void CallRPC(int target, uint networkId, uint subId, string methodName, params object[] parameters)
     {
         var packet = new CallRPCPacket
         {
@@ -176,8 +180,10 @@ public static class RepoSteamNetwork
             MethodName = methodName,
             Parameters = parameters
         };
+
+        var destination = (NetworkDestination)target;
         
-        SendPacket(packet);
+        SendPacket(packet, destination);
     }
 
     internal static void InvokeRPC(uint networkId, uint subId, string methodName, params object[] parameters)
