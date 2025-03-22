@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RepoSteamNetworking.SourceGenerator.Utils;
 
 namespace RepoSteamNetworking.SourceGenerator;
 
@@ -12,8 +13,6 @@ public class RPCMethodGenerator : IIncrementalGenerator
     
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        context.RegisterPostInitializationOutput(PostInitialization);
-        
         var pipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
             fullyQualifiedMetadataName: "RepoSteamNetworking.API.Unity.RepoSteamRPCAttribute",
             predicate: (node, token) =>
@@ -45,11 +44,6 @@ public class RPCMethodGenerator : IIncrementalGenerator
         );
         
         context.RegisterSourceOutput(pipeline.Collect(), GenerateOutput);
-    }
-
-    private void PostInitialization(IncrementalGeneratorPostInitializationContext ctx)
-    {
-        
     }
 
     private void GenerateOutput(SourceProductionContext context, ImmutableArray<RpcMethodContext> methods)
@@ -149,8 +143,6 @@ public class RPCMethodGenerator : IIncrementalGenerator
         public string Namespace = @namespace;
         public string ClassName = className;
         public string MethodName = methodName;
-        // public string[] Parameters = parameters;
-        
         public IParameterSymbol[] Parameters = parameters;
         public TypedConstant RPCTarget = rpcTarget;
         

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.CodeAnalysis.Text;
 
-namespace RepoSteamNetworking.SourceGenerator;
+namespace RepoSteamNetworking.SourceGenerator.Utils;
 
 internal class CodeBuilder
 {

@@ -36,7 +36,7 @@ public class RepoSteamNetworkIdentity : MonoBehaviour
         RepoSteamNetworkManager.Instance.RegisterNetworkIdentity(this);
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         RepoSteamNetworkManager.Instance.UnRegisterNetworkIdentity(this);
     }

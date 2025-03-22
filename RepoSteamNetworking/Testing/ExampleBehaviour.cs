@@ -7,6 +7,9 @@ namespace RepoSteamNetworking.Testing;
 
 public partial class ExampleBehaviour : MonoBehaviour
 {
+    [NetworkedProperty]
+    public int testNumber;
+    
     [RepoSteamRPC]
     public void DoExampleRPC(string message, Vector3 position)
     {
