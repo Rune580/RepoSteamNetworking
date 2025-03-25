@@ -114,7 +114,7 @@ public class RPCMethodGenerator : IIncrementalGenerator
         if (!string.IsNullOrEmpty(methodParameters) && !string.IsNullOrEmpty(paramNames))
         {
             methodParameters = methodParameters.Substring(0, methodParameters.Length - 2);
-            paramNames = paramNames.Substring(0, paramNames.Length - 2);
+            paramNames = $", {paramNames.Substring(0, paramNames.Length - 2)}";
         }
 
         var generatedMethodName = rpcMethodContext.MethodName.Substring(0, rpcMethodContext.MethodName.Length - 3);
@@ -131,7 +131,7 @@ public class RPCMethodGenerator : IIncrementalGenerator
                                }
                                
                                var networkId = networkIdentity.NetworkId;
-                               RepoSteamNetwork.CallRPC({{rpcMethodContext.RPCTarget.Value}}, networkId, SubId, nameof({{rpcMethodContext.MethodName}}), {{paramNames}});
+                               RepoSteamNetwork.CallRPC({{rpcMethodContext.RPCTarget.Value}}, networkId, SubId, nameof({{rpcMethodContext.MethodName}}){{paramNames}});
                            }
                            """;
         
