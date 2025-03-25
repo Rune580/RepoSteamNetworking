@@ -1,3 +1,8 @@
+using System.Text;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Text;
+
 namespace RepoSteamNetworking.SourceGenerator.Tests;
 
 [TestFixture]
@@ -16,29 +21,49 @@ public class NetworkedPropertyTests
         var code = """
                    using RepoSteamNetworking.API.Unity;
                    
-                   public partial class ExampleBehaviour
+                   namespace ExampleNamespace
                    {
-                       [NetworkedProperty]
-                       public int testNumber;
+                        public partial class ExampleBehaviour
+                        {
+                            [NetworkedProperty]
+                            public int testNumber;
+                        }
                    }
                    """;
 
+        var expectedFileName = "RepoSteamNetworking.SourceGenerator/RepoSteamNetworking.SourceGenerator.NetworkedPropertyGenerator/ExampleNamespace.ExampleBehaviour_NetworkedFieldProps.g.cs";
         var expectedCode = """
-                           using RepoSteamNetworking.API.Unity;
-                           
-                           public partial class ExampleBehaviour
+                           namespace ExampleNamespace
                            {
-                               [NetworkedProperty]
-                               public int testNumber;
+                                partial class ExampleBehaviour
+                                {
+                                    public int TestNumber
+                                    {
+                                        get => testNumber;
+                                        set
+                                        {
+                                            if (testNumber == value)
+                                            {
+                                                return;
+                                            }
+                                            testNumber = value;
+                                        }
+                                    }
+                                }
                            }
                            """;
 
+        expectedCode = CSharpSyntaxTree.ParseText(expectedCode)
+            .GetRoot()
+            .NormalizeWhitespace()
+            .ToFullString();
+        
         var runner = new CSharpSourceGeneratorVerifier<NetworkedPropertyGenerator>.Test
         {
             TestState =
             {
-                Sources = { code, GetRequiredCode() },
-                // GeneratedSources = {  }
+                Sources = { ("ExampleBehaviour.cs", code), GetRequiredCode() },
+                GeneratedSources = { (expectedFileName, SourceText.From(expectedCode, Encoding.UTF8)) },
             }
         };
 

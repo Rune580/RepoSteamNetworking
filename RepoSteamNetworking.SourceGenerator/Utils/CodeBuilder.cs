@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 
 namespace RepoSteamNetworking.SourceGenerator.Utils;
@@ -92,8 +94,13 @@ internal class CodeBuilder
         code.Append(_body);
 
         code.Append("}");
+
+        var fullCode = CSharpSyntaxTree.ParseText(code.ToString())
+            .GetRoot()
+            .NormalizeWhitespace()
+            .ToFullString();
         
-        return code.ToString();
+        return fullCode;
     }
 
     public SourceText ToSourceText(Encoding encoding = null)

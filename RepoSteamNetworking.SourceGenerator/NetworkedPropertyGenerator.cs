@@ -15,46 +15,59 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
             fullyQualifiedMetadataName: "RepoSteamNetworking.API.Unity.NetworkedPropertyAttribute",
             predicate: (node, token) =>
             {
-                if (node is not BaseFieldDeclarationSyntax fieldDeclSyntax)
+                if (node is VariableDeclaratorSyntax variableDeclaratorSyntax)
+                {
+                    if (variableDeclaratorSyntax.Parent is VariableDeclarationSyntax { Parent: not BaseFieldDeclarationSyntax })
+                        return false;
+                }
+                else if (node is not BaseFieldDeclarationSyntax fieldDeclSyntax)
+                {
                     return false;
-                
+                }
+
                 return true;
             },
             transform: (syntaxContext, token) =>
             {
                 var containingClass = syntaxContext.TargetSymbol.ContainingType;
-                // var containingNamespace = containingClass.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+                var containingNamespace = containingClass.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
                 
-                // var attr = syntaxContext.Attributes[0];
-                // var propertyName = attr.NamedArguments.Where(kvp => kvp.Key == "OverridePropertyName")
-                //     .Select(kvp => kvp.Value.Value as string)
-                //     .FirstOrDefault();
-
-                var propertyName = "";
-
-                // var fieldSymbol = (IFieldSymbol)syntaxContext.TargetSymbol;
-                // fieldSymbol = fieldSymbol.;
-
-                // var modifiers = new[]
-                // {
-                //     syntaxContext.TargetNode.GetType().ToString()
-                // };
+                var attr = syntaxContext.Attributes[0];
+                var propertyName = attr.NamedArguments.Where(kvp => kvp.Key == "OverridePropertyName")
+                    .Select(kvp => kvp.Value.Value as string)
+                    .FirstOrDefault();
                 
-                // var fieldSyntax = (BaseFieldDeclarationSyntax)syntaxContext.TargetNode;
-                // var modifiers = fieldSyntax.Modifiers.Select(modifier => modifier.ToFullString())
-                //     .ToArray();
+                var fieldSymbol = (IFieldSymbol)syntaxContext.TargetSymbol;
+
+                FieldDeclarationSyntax fieldSyntax = null;
+
+                if (syntaxContext.TargetNode is VariableDeclaratorSyntax declaratorSyntax)
+                {
+                    if (declaratorSyntax.Parent is VariableDeclarationSyntax { Parent: FieldDeclarationSyntax fieldDeclarationSyntax })
+                        fieldSyntax = fieldDeclarationSyntax;
+                }
+                else
+                {
+                    fieldSyntax = (FieldDeclarationSyntax)syntaxContext.TargetNode;
+                }
+                
+                var modifiers = fieldSyntax!.Modifiers.Select(modifier => modifier.ToFullString().Trim())
+                    .ToArray();
+
+                modifiers = modifiers.Append(fieldSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted)))
+                    .ToArray();
                 
                 var backingField = syntaxContext.TargetSymbol.Name;
 
-                // if (string.IsNullOrEmpty(propertyName))
-                //     propertyName = backingField.ToPascalCase();
+                if (string.IsNullOrEmpty(propertyName))
+                    propertyName = backingField.ToPascalCase();
                 
                 return new NetworkedPropertyContext
                 {
-                    PropertyName = "propertyName",
+                    PropertyName = propertyName,
                     BackingFieldName = backingField,
-                    Modifiers = [],
-                    Namespace = "containingNamespace",
+                    Modifiers = modifiers,
+                    Namespace = containingNamespace,
                     ClassName = containingClass.Name,
                 };
             }
@@ -83,9 +96,9 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                     .Trim();
 
                 code.AppendLine($"{modifiers} {prop.PropertyName}\n{{")
-                    .AppendLine($"get => {prop.BackingFieldName},")
+                    .AppendLine($"get => {prop.BackingFieldName};")
                     .AppendLine("set\n{")
-                    .AppendLine($"if ({prop.BackingFieldName} != value)\n{{return;\n}}")
+                    .AppendLine($"if ({prop.BackingFieldName} == value)\n{{\nreturn;\n}}")
                     .AppendLine($"{prop.BackingFieldName} = value;")
                     .AppendLine("}\n}");
             }
