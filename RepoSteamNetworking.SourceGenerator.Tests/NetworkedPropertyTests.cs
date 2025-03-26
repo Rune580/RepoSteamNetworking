@@ -69,4 +69,59 @@ public class NetworkedPropertyTests
 
         await runner.RunAsync();
     }
+
+    [Test]
+    public async Task FromAutoPropertyTest()
+    {
+        var code = """
+                   using RepoSteamNetworking.API.Unity;
+
+                   namespace ExampleNamespace
+                   {
+                        public partial class ExampleBehaviour
+                        {
+                            [NetworkedProperty]
+                            public partial int TestNumber { get; set; }
+                        }
+                   }
+                   """;
+        
+        var expectedFileName = "RepoSteamNetworking.SourceGenerator/RepoSteamNetworking.SourceGenerator.NetworkedPropertyGenerator/ExampleNamespace.ExampleBehaviour_NetworkedAutoProps.g.cs";
+        var expectedCode = """
+                           namespace ExampleNamespace
+                           {
+                                partial class ExampleBehaviour
+                                {
+                                    public partial int TestNumber
+                                    {
+                                        get => field;
+                                        set
+                                        {
+                                            if (field == value)
+                                            {
+                                                return;
+                                            }
+                                            field = value;
+                                        }
+                                    }
+                                }
+                           }
+                           """;
+        
+        expectedCode = CSharpSyntaxTree.ParseText(expectedCode)
+            .GetRoot()
+            .NormalizeWhitespace()
+            .ToFullString();
+        
+        var runner = new CSharpSourceGeneratorVerifier<NetworkedPropertyGenerator>.Test
+        {
+            TestState =
+            {
+                Sources = { ("ExampleBehaviour.cs", code), GetRequiredCode() },
+                GeneratedSources = { (expectedFileName, SourceText.From(expectedCode, Encoding.UTF8)) },
+            }
+        };
+
+        await runner.RunAsync();
+    }
 }

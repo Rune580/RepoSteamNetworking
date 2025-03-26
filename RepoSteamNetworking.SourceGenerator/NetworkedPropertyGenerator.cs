@@ -9,10 +9,12 @@ namespace RepoSteamNetworking.SourceGenerator;
 [Generator]
 public class NetworkedPropertyGenerator : IIncrementalGenerator
 {
+    private const string AttributeName = "RepoSteamNetworking.API.Unity.NetworkedPropertyAttribute";
+    
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var fieldPipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: "RepoSteamNetworking.API.Unity.NetworkedPropertyAttribute",
+            fullyQualifiedMetadataName: AttributeName,
             predicate: (node, token) =>
             {
                 if (node is VariableDeclaratorSyntax variableDeclaratorSyntax)
@@ -72,8 +74,48 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                 };
             }
         );
+
+        var propertyPipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
+            fullyQualifiedMetadataName: AttributeName,
+            predicate: (node, token) =>
+            {
+                if (node is not BasePropertyDeclarationSyntax propertyDeclarationSyntax)
+                    return false;
+
+                return true;
+            },
+            transform: (syntaxContext, token) =>
+            {
+                var containingClass = syntaxContext.TargetSymbol.ContainingType;
+                var containingNamespace = containingClass.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+                
+                var propertySymbol = (IPropertySymbol)syntaxContext.TargetSymbol;
+                var propertySyntax = (BasePropertyDeclarationSyntax)syntaxContext.TargetNode;
+                
+                var modifiers = propertySyntax!.Modifiers.Select(modifier => modifier.ToFullString().Trim())
+                    .ToArray();
+                
+                modifiers = modifiers.Append(propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted)))
+                    .ToArray();
+
+                var propertyName = syntaxContext.TargetSymbol.Name;
+                
+                return new NetworkedPropertyContext
+                {
+                    PropertyName = propertyName,
+                    BackingFieldName = "field",
+                    Modifiers = modifiers,
+                    Namespace = containingNamespace,
+                    ClassName = containingClass.Name,
+                };
+            }
+        );
+
+        // var fieldProps = fieldPipeline.Collect();
+        var autoProps = propertyPipeline.Collect();
         
-        context.RegisterSourceOutput(fieldPipeline.Collect(), GenerateFromField);
+        // context.RegisterSourceOutput(fieldProps, GenerateFromField);
+        context.RegisterSourceOutput(autoProps, GenerateFromAutoProp);
     }
 
     private void GenerateFromField(SourceProductionContext context, ImmutableArray<NetworkedPropertyContext> propContexts)
@@ -105,6 +147,38 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
 
             var sourceText = code.ToSourceText();
             context.AddSource($"{group.Key}_NetworkedFieldProps.g.cs", sourceText);
+        }
+    }
+
+    private void GenerateFromAutoProp(SourceProductionContext context, ImmutableArray<NetworkedPropertyContext> propContexts)
+    {
+        var groupedProps = propContexts.GroupBy(ctx => ctx.FullClassName);
+
+        foreach (var group in groupedProps)
+        {
+            var props = group.ToArray();
+
+            var code = new CodeBuilder();
+            
+            code.WithNamespace(props[0].Namespace);
+
+            code.AppendLine($"partial class {props[0].ClassName}\n{{");
+
+            foreach (var prop in props)
+            {
+                var modifiers = prop.Modifiers.Aggregate("", (current, modifier) => current + $"{modifier} ")
+                    .Trim();
+
+                code.AppendLine($"{modifiers} {prop.PropertyName}\n{{")
+                    .AppendLine($"get => {prop.BackingFieldName};")
+                    .AppendLine("set\n{")
+                    .AppendLine($"if ({prop.BackingFieldName} == value)\n{{\nreturn;\n}}")
+                    .AppendLine($"{prop.BackingFieldName} = value;")
+                    .AppendLine("}\n}");
+            }
+
+            var sourceText = code.ToSourceText();
+            context.AddSource($"{group.Key}_NetworkedAutoProps.g.cs", sourceText);
         }
     }
 
