@@ -12,9 +12,7 @@ public class RepoSteamNetworkIdentity : MonoBehaviour
     public uint NetworkId { get; private set; }
     public bool IsValid { get; private set; }
 
-    private readonly Dictionary<uint, ISteamNetworkSubIdentity> _networkedBehaviours = new();
-
-    private uint NextId => field++;
+    private readonly Dictionary<string, ModScopedSubIdentityMap> _modSubIdentities = new();
     
     private void Awake()
     {
@@ -50,18 +48,35 @@ public class RepoSteamNetworkIdentity : MonoBehaviour
     public void RegisterSubIdentity<T>(T target)
         where T : ISteamNetworkSubIdentity
     {
-        // Don't register twice
-        if (target.IsValid && _networkedBehaviours.ContainsKey(target.SubId))
-            return;
+        if (!_modSubIdentities.TryGetValue(target.ModGuid, out var scopedSubIdentityMap))
+            _modSubIdentities[target.ModGuid] = scopedSubIdentityMap = new ModScopedSubIdentityMap();
         
-        target.SubId = NextId;
-        target.IsValid = true;
-        
-        _networkedBehaviours[target.SubId] = target;
+        scopedSubIdentityMap.RegisterSubIdentity(target);
     }
 
-    public ISteamNetworkSubIdentity GetSubIdentity(uint subId)
+    public ISteamNetworkSubIdentity GetSubIdentity(string modGuid, uint subId)
     {
-        return _networkedBehaviours[subId];
+        return _modSubIdentities[modGuid][subId];
+    }
+
+    private class ModScopedSubIdentityMap
+    {
+        private readonly Dictionary<uint, ISteamNetworkSubIdentity> _networkedBehaviours = new();
+        private uint NextId => field++;
+
+        public void RegisterSubIdentity<T>(T target)
+            where T : ISteamNetworkSubIdentity
+        {
+            // Don't register twice
+            if (target.IsValid && _networkedBehaviours.ContainsKey(target.SubId))
+                return;
+            
+            target.SubId = NextId;
+            target.IsValid = true;
+        
+            _networkedBehaviours[target.SubId] = target;
+        }
+        
+        public ISteamNetworkSubIdentity this[uint subId] => _networkedBehaviours[subId];
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using RepoSteamNetworking.API;
 using RepoSteamNetworking.Utils;
 
-namespace RepoSteamNetworking.Networking.Packets;
+namespace RepoSteamNetworking.Networking.Registries;
 
 internal static class NetworkPacketRegistry
 {

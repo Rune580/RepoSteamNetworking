@@ -7,7 +7,7 @@ using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Utils;
 
-namespace RepoSteamNetworking.Networking;
+namespace RepoSteamNetworking.Networking.Registries;
 
 internal static class VersionCompatRegistry
 {

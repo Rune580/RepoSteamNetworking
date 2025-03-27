@@ -3,6 +3,7 @@ using RepoSteamNetworking.API;
 using RepoSteamNetworking.API.Asset;
 using RepoSteamNetworking.API.Unity;
 using RepoSteamNetworking.Networking.Data;
+using RepoSteamNetworking.Networking.Registries;
 using RepoSteamNetworking.Utils;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -15,7 +16,8 @@ public class RepoSteamNetworkManager : MonoBehaviour
     public static RepoSteamNetworkManager Instance => _instance;
     
     private readonly Dictionary<uint, RepoSteamNetworkIdentity> _networkObjects = new();
-    
+    private ModNetworkGuidPalette _palette = new();
+        
     internal uint NewNetworkId => field++;
     
     private void Awake()
@@ -57,6 +59,12 @@ public class RepoSteamNetworkManager : MonoBehaviour
         
         _networkObjects.Remove(networkIdentity.NetworkId);
     }
+    
+    internal void SetModGuidPalette(ModNetworkGuidPalette palette) => _palette = palette;
+
+    internal string GetModGuid(uint paletteId) => _palette.GetModGuid(paletteId);
+    
+    internal uint GetGuidPaletteId(string modGuid) => _palette.GetPaletteId(modGuid);
     
     internal RepoSteamNetworkIdentity GetNetworkIdentity(uint networkId) => _networkObjects[networkId];
 
@@ -120,6 +128,7 @@ public class RepoSteamNetworkManager : MonoBehaviour
         }
         
         VersionCompatRegistry.InitRegistry();
+        ModNetworkGuidRegistry.Init();
         
         Instantiate(new GameObject("RepoSteamNetworkManager"), parent.transform)
             .AddComponent<RepoSteamNetworkManager>();

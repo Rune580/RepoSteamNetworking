@@ -10,7 +10,7 @@ using Steamworks.Data;
 
 namespace RepoSteamNetworking.Networking;
 
-internal class SteamUserConnection : IEquatable<SteamUserConnection>
+public class SteamUserConnection : IEquatable<SteamUserConnection>
 {
     private string _clientKey = "";
     private Connection _connection;
@@ -21,7 +21,6 @@ internal class SteamUserConnection : IEquatable<SteamUserConnection>
     public SteamId SteamId { get; private set; }
     
     public ConnectionStatus Status { get; private set; }
-
 
     public string UserName
     {
@@ -34,7 +33,7 @@ internal class SteamUserConnection : IEquatable<SteamUserConnection>
         }
     } = "";
 
-    public SteamUserConnection(Connection connection)
+    internal SteamUserConnection(Connection connection)
     {
         _connection = connection;
         _timer = new Timer(10000);
@@ -43,7 +42,7 @@ internal class SteamUserConnection : IEquatable<SteamUserConnection>
         Status = ConnectionStatus.Unverified;
     }
 
-    public void StartVerification()
+    internal void StartVerification()
     {
         _clientKey = RepoNetworkingServer.Instance.CreateAuthKey();
 
@@ -63,7 +62,7 @@ internal class SteamUserConnection : IEquatable<SteamUserConnection>
         Logging.Info($"Waiting for Connection {ConnectionId} to verify...");
     }
 
-    public void StartModListValidation()
+    internal void StartModListValidation()
     {
         _timer.Elapsed += OnValidationTimeout;
         _timer.Start();
@@ -71,7 +70,7 @@ internal class SteamUserConnection : IEquatable<SteamUserConnection>
         Logging.Info($"Waiting for Client {UserName} to validate mod list compatibility...");
     }
 
-    public bool VerifyAuth(HandshakeAuthConnectionPacket packet)
+    internal bool VerifyAuth(HandshakeAuthConnectionPacket packet)
     {
         var lobby = RepoNetworkingServer.Instance.CurrentLobby;
 
@@ -89,7 +88,7 @@ internal class SteamUserConnection : IEquatable<SteamUserConnection>
         return false;
     }
 
-    public void SetVerifiedWithSteamId(SteamId steamId)
+    internal void SetVerifiedWithSteamId(SteamId steamId)
     {
         SteamId = steamId;
         Status = ConnectionStatus.Verified;
@@ -102,7 +101,7 @@ internal class SteamUserConnection : IEquatable<SteamUserConnection>
         _timer.Stop();
     }
 
-    public void SetValidated()
+    internal void SetValidated()
     {
         if (Status is not ConnectionStatus.Verified)
             return;
@@ -164,6 +163,13 @@ internal class SteamUserConnection : IEquatable<SteamUserConnection>
 
     public Result SendMessage(byte[] data, SendType sendType = SendType.Reliable) =>
         _connection.SendMessage(data, sendType);
+
+    public void SendPacket<TPacket>(TPacket packet)
+        where TPacket : NetworkPacket
+    {
+        packet.Header.Target = SteamId;
+        RepoSteamNetwork.SendPacket(packet, NetworkDestination.PacketTarget);
+    }
 
     public bool Equals(SteamUserConnection? other)
     {

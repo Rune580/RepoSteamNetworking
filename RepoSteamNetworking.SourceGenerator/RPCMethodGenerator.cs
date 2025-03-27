@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RepoSteamNetworking.SourceGenerator.Utils;
@@ -9,19 +10,13 @@ namespace RepoSteamNetworking.SourceGenerator;
 [Generator]
 public class RPCMethodGenerator : IIncrementalGenerator
 {
-    private const string NetworkIdentityClassName = "RepoSteamNetworkIdentity";
+    public const string AttributeClassName = "RepoSteamNetworking.API.Unity.RepoSteamRPCAttribute";
     
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var pipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: "RepoSteamNetworking.API.Unity.RepoSteamRPCAttribute",
-            predicate: (node, token) =>
-            {
-                if (node is not MethodDeclarationSyntax methodDeclarationSyntax)
-                    return false;
-
-                return methodDeclarationSyntax.Identifier.Text.EndsWith("RPC");
-            },
+            fullyQualifiedMetadataName: AttributeClassName,
+            predicate: RPCMethodPredicate,
             transform: (syntaxContext, token) =>
             {
                 var rpcTarget = syntaxContext.Attributes[0].ConstructorArguments[0];
@@ -46,7 +41,15 @@ public class RPCMethodGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(pipeline.Collect(), GenerateOutput);
     }
 
-    private void GenerateOutput(SourceProductionContext context, ImmutableArray<RpcMethodContext> methods)
+    public static bool RPCMethodPredicate(SyntaxNode node, CancellationToken token)
+    {
+        if (node is not MethodDeclarationSyntax methodDeclarationSyntax)
+            return false;
+
+        return methodDeclarationSyntax.Identifier.Text.EndsWith("RPC");
+    }
+
+    private static void GenerateOutput(SourceProductionContext context, ImmutableArray<RpcMethodContext> methods)
     {
         if (methods.Length == 0)
             return;
@@ -60,29 +63,10 @@ public class RPCMethodGenerator : IIncrementalGenerator
             var code = new CodeBuilder();
 
             code.WithImports("RepoSteamNetworking.API", "RepoSteamNetworking.API.Unity")
-                .WithNamespace(classMethods[0].Namespace);
-
-            code.AppendLine($"partial class {classMethods[0].ClassName} : ISteamNetworkSubIdentity\n{{");
-
-            code.AppendLine($$"""
-                              public uint SubId { get; set; }
-                              
-                              public bool IsValid { get; set; }
-                              
-                              private {{NetworkIdentityClassName}} _networkIdentity;
-
-                              public {{NetworkIdentityClassName}} GetNetworkIdentity()
-                              {
-                                  if (!_networkIdentity)
-                                  {
-                                      _networkIdentity = GetComponentInParent<{{NetworkIdentityClassName}}>(true);
-                                  }
-                                  
-                                  return _networkIdentity;
-                              }
-                              """);
+                .WithNamespace(classMethods[0].Namespace); 
             
-            
+            code.AppendLine($"partial class {classMethods[0].ClassName}\n{{");
+             
             foreach (var rpcMethodContext in classMethods)
             {
                 code.AppendLine(GenerateRPCMethod(rpcMethodContext));
@@ -126,12 +110,12 @@ public class RPCMethodGenerator : IIncrementalGenerator
                                
                                if (!networkIdentity || !networkIdentity.IsValid)
                                {
-                                   UnityEngine.Debug.LogError($"Failed to call rpc {{rpcMethodContext.MethodName}} as there was no valid network identity!\nMake sure there's a {{NetworkIdentityClassName}} component on the root of the prefab that the component {{rpcMethodContext.FullClassName}} is attached to!");
+                                   UnityEngine.Debug.LogError($"Failed to call rpc {{rpcMethodContext.MethodName}} as there was no valid network identity!\nMake sure there's a {{SteamNetworkSubIdentityImplementerGenerator.NetworkIdentityClassName}} component on the root of the prefab that the component {{rpcMethodContext.FullClassName}} is attached to!");
                                    return;
                                }
                                
                                var networkId = networkIdentity.NetworkId;
-                               RepoSteamNetwork.CallRPC({{rpcMethodContext.RPCTarget.Value}}, networkId, SubId, nameof({{rpcMethodContext.MethodName}}){{paramNames}});
+                               RepoSteamNetwork.CallRPC({{rpcMethodContext.RPCTarget.Value}}, networkId, ModGuid, SubId, nameof({{rpcMethodContext.MethodName}}){{paramNames}});
                            }
                            """;
         

@@ -2,6 +2,7 @@ using System.Linq;
 using RepoSteamNetworking.API;
 using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking.Packets;
+using RepoSteamNetworking.Networking.Registries;
 using RepoSteamNetworking.Networking.Unity;
 using RepoSteamNetworking.Utils;
 
@@ -84,6 +85,13 @@ internal static class PacketHandler
             return;
         
         userConnection.SetValidated();
+        
+        // Send ModNetworkGuidPalette to client
+        var palettePacket = new SetConnectionModNetworkGuidPalettePacket
+        {
+            Palette = ModNetworkGuidRegistry.Palette
+        };
+        userConnection.SendPacket(palettePacket);
     }
 
     public static void OnServerModVersionRegistryReceived(ServerModVersionRegistryStatusPacket packet)
@@ -111,9 +119,14 @@ internal static class PacketHandler
         Logging.Warn("There's a mismatch in mods and or mod versions! You are responsible for any issues you may encounter!");
     }
 
+    public static void OnSetConnectionModNetworkGuidPaletteReceived(SetConnectionModNetworkGuidPalettePacket packet)
+    {
+        RepoSteamNetworkManager.Instance.SetModGuidPalette(packet.Palette);
+    }
+
     public static void OnCallRPCPacketReceived(CallRPCPacket packet)
     {
-        RepoSteamNetwork.InvokeRPC(packet.NetworkId, packet.SubId, packet.MethodName, packet.Parameters);
+        RepoSteamNetwork.InvokeRPC(packet.NetworkId, packet.GuidPaletteId, packet.SubId, packet.MethodName, packet.Parameters);
     }
 
     public static void OnInstantiateNetworkedPrefabServerPacketReceived(InstantiateNetworkedPrefabServerPacket packet)

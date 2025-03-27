@@ -27,4 +27,6 @@ public partial class ExampleBehaviour : MonoBehaviour
             DoExample("Hello Mario", Random.insideUnitSphere);
         }
     }
+
+    public string ModGuid => PluginInfo.PLUGIN_GUID;
 }

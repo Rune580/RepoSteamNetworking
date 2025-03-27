@@ -1,5 +1,6 @@
 using System;
 using RepoSteamNetworking.Networking.Data;
+using RepoSteamNetworking.Networking.Registries;
 using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;
@@ -29,6 +30,7 @@ public class RepoNetworkingServer : MonoBehaviour
         }
         
         VersionCompatRegistry.InitRegistry();
+        ModNetworkGuidRegistry.Init();
         
         Instantiate(new GameObject("RepoNetworkingServer"), parent.transform)
             .AddComponent<RepoNetworkingServer>();
@@ -58,7 +60,7 @@ public class RepoNetworkingServer : MonoBehaviour
         SocketManager = SteamNetworkingSockets.CreateRelaySocket<RepoNetworkSocketManager>();
         _serverActive = true;
         
-        // CreateAuthKeyForHandshake();
+        RepoSteamNetworkManager.Instance.SetModGuidPalette(ModNetworkGuidRegistry.Palette);
     }
 
     public string CreateAuthKey()

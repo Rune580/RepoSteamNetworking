@@ -8,6 +8,7 @@ using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
+using RepoSteamNetworking.Networking.Registries;
 using RepoSteamNetworking.Networking.Unity;
 using RepoSteamNetworking.Utils;
 using Steamworks;
@@ -168,14 +169,17 @@ public static class RepoSteamNetwork
         }
     }
 
-    public static void CallRPC(RPCTarget target, uint networkId, uint subId, string methodName,
-        params object[] parameters) => CallRPC((int)target, networkId, subId, methodName, parameters);
+    public static void CallRPC(RPCTarget target, uint networkId, string modGuid, uint subId, string methodName,
+        params object[] parameters) => CallRPC((int)target, networkId, modGuid, subId, methodName, parameters);
 
-    public static void CallRPC(int target, uint networkId, uint subId, string methodName, params object[] parameters)
+    public static void CallRPC(int target, uint networkId, string modGuid, uint subId, string methodName, params object[] parameters)
     {
+        var guidPaletteId = RepoSteamNetworkManager.Instance.GetGuidPaletteId(modGuid);
+        
         var packet = new CallRPCPacket
         {
             NetworkId = networkId,
+            GuidPaletteId = guidPaletteId,
             SubId = subId,
             MethodName = methodName,
             Parameters = parameters
@@ -186,10 +190,11 @@ public static class RepoSteamNetwork
         SendPacket(packet, destination);
     }
 
-    internal static void InvokeRPC(uint networkId, uint subId, string methodName, params object[] parameters)
+    internal static void InvokeRPC(uint networkId, uint guidPaletteId, uint subId, string methodName, params object[] parameters)
     {
         var networkIdentity = RepoSteamNetworkManager.Instance.GetNetworkIdentity(networkId);
-        var subIdentity = networkIdentity.GetSubIdentity(subId);
+        var modGuid = RepoSteamNetworkManager.Instance.GetModGuid(guidPaletteId);
+        var subIdentity = networkIdentity.GetSubIdentity(modGuid, subId);
         
         RPCHelper.InvokeRPC(subIdentity, methodName, parameters);
     }
