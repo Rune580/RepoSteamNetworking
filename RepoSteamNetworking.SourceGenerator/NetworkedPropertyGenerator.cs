@@ -130,11 +130,10 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                 return props.ToImmutableArray();
             });
         
-        context.RegisterSourceOutput(fieldPipeline.Collect(), GenerateFromField);
-        context.RegisterSourceOutput(propertyPipeline.Collect(), GenerateFromAutoProp);
+        context.RegisterSourceOutput(networkProps, GenerateNetworkProperty);
     }
 
-    private static void GenerateFromField(SourceProductionContext context, ImmutableArray<NetworkedPropertyContext> propContexts)
+    private static void GenerateNetworkProperty(SourceProductionContext context, ImmutableArray<NetworkedPropertyContext> propContexts)
     {
         var groupedProps = propContexts.GroupBy(ctx => ctx.FullClassName);
 
@@ -153,39 +152,8 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                 var modifiers = prop.Modifiers.Aggregate("", (current, modifier) => current + $"{modifier} ")
                     .Trim();
 
-                code.AppendLine($"{modifiers} {prop.TypeName} {prop.PropertyName}\n{{")
-                    .AppendLine($"get => {prop.BackingFieldName};")
-                    .AppendLine("set\n{")
-                    .AppendLine($"if ({prop.BackingFieldName} == value)\n{{\nreturn;\n}}")
-                    .AppendLine($"{prop.BackingFieldName} = value;")
-                    .AppendLine("}\n}");
-            }
-
-            var sourceText = code.ToSourceText();
-            context.AddSource($"{group.Key}_NetworkedFieldProps.g.cs", sourceText);
-        }
-    }
-
-    private static void GenerateFromAutoProp(SourceProductionContext context, ImmutableArray<NetworkedPropertyContext> propContexts)
-    {
-        var groupedProps = propContexts.GroupBy(ctx => ctx.FullClassName);
-
-        foreach (var group in groupedProps)
-        {
-            var props = group.ToArray();
-
-            var code = new CodeBuilder();
-            
-            code.WithNamespace(props[0].Namespace);
-
-            code.AppendLine($"partial class {props[0].ClassName}\n{{");
-
-            foreach (var prop in props)
-            {
-                var modifiers = prop.Modifiers.Aggregate("", (current, modifier) => current + $"{modifier} ")
-                    .Trim();
-
-                code.AppendLine($"private {prop.TypeName} {prop.BackingFieldName};");
+                if (prop.NeedsField)
+                    code.AppendLine($"private {prop.TypeName} {prop.BackingFieldName};");
 
                 code.AppendLine($"{modifiers} {prop.TypeName} {prop.PropertyName}\n{{")
                     .AppendLine($"get => {prop.BackingFieldName};")
@@ -196,7 +164,7 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
             }
 
             var sourceText = code.ToSourceText();
-            context.AddSource($"{group.Key}_NetworkedAutoProps.g.cs", sourceText);
+            context.AddSource($"{group.Key}_NetworkedProperties.g.cs", sourceText);
         }
     }
 
