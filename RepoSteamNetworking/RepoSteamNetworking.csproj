@@ -17,9 +17,9 @@
         <PackageId>Rune580.Mods.Repo.RepoSteamNetworking</PackageId>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
-        <PackageProjectUrl>https://github.com/Wet-Boys/RepoEmotesApi</PackageProjectUrl>
-<!--        <PackageIcon>repo-emotes-api-static-icon.png</PackageIcon>-->
-        <RepositoryUrl>https://github.com/Wet-Boys/RepoEmotesApi</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/Rune580/RepoSteamNetworking</PackageProjectUrl>
+        <PackageIcon>repo-emotes-api-static-icon.png</PackageIcon>
+        <RepositoryUrl>https://github.com/Rune580/RepoSteamNetworking</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
     </PropertyGroup>
 
