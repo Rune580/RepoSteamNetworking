@@ -21,7 +21,7 @@ internal static class Logging
     {
         if (_logSource is null)
         {
-            UnityEngine.Debug.LogError($"[{PluginInfo.PLUGIN_NAME}] [Error] {msg}");
+            UnityEngine.Debug.LogError($"[{MyPluginInfo.PLUGIN_NAME}] [Error] {msg}");
         }
         else
         {
@@ -33,7 +33,7 @@ internal static class Logging
     {
         if (_logSource is null)
         {
-            UnityEngine.Debug.LogWarning($"[{PluginInfo.PLUGIN_NAME}] [Warning] {msg}");
+            UnityEngine.Debug.LogWarning($"[{MyPluginInfo.PLUGIN_NAME}] [Warning] {msg}");
         }
         else
         {
@@ -45,7 +45,7 @@ internal static class Logging
     {
         if (_logSource is null)
         {
-            UnityEngine.Debug.Log($"[{PluginInfo.PLUGIN_NAME}] [Info] {msg}");
+            UnityEngine.Debug.Log($"[{MyPluginInfo.PLUGIN_NAME}] [Info] {msg}");
         }
         else
         {
@@ -57,7 +57,7 @@ internal static class Logging
     {
         if (_logSource is null)
         {
-            UnityEngine.Debug.Log($"[{PluginInfo.PLUGIN_NAME}] [Debug] {msg}");
+            UnityEngine.Debug.Log($"[{MyPluginInfo.PLUGIN_NAME}] [Debug] {msg}");
         }
         else
         {

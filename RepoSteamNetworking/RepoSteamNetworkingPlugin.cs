@@ -15,7 +15,7 @@ using UnityEngine;
 namespace RepoSteamNetworking;
 
 [RSNVersionCompatibility(VersionCompatibility.Any, optional: false)]
-[BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
+[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 public class RepoSteamNetworkingPlugin : BaseUnityPlugin
 {
     internal static AssetBundleReference TestBundle;
@@ -24,7 +24,7 @@ public class RepoSteamNetworkingPlugin : BaseUnityPlugin
     {
         Logging.SetLogSource(Logger);
         
-        Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), PluginInfo.PLUGIN_GUID);
+        Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), MyPluginInfo.PLUGIN_GUID);
         
         RegisterPackets();
         
@@ -61,7 +61,7 @@ public class RepoSteamNetworkingPlugin : BaseUnityPlugin
 
     private void DoAssetBundleStuff()
     {
-        if (!Chainloader.PluginInfos.TryGetValue(PluginInfo.PLUGIN_GUID, out var pluginInfo))
+        if (!Chainloader.PluginInfos.TryGetValue(MyPluginInfo.PLUGIN_GUID, out var pluginInfo))
             throw new Exception("Failed to find plugin info!");
 
         if (pluginInfo is null)
@@ -81,6 +81,6 @@ public class RepoSteamNetworkingPlugin : BaseUnityPlugin
 
         var assetBundle = AssetBundle.LoadFromFile(assetBundlePath);
 
-        TestBundle = RepoSteamNetwork.RegisterAssetBundle(assetBundle, PluginInfo.PLUGIN_GUID);
+        TestBundle = RepoSteamNetwork.RegisterAssetBundle(assetBundle, MyPluginInfo.PLUGIN_GUID);
     }
 }

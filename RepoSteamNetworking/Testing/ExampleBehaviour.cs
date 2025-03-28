@@ -12,7 +12,7 @@ public partial class ExampleBehaviour : MonoBehaviour
 
     [NetworkedProperty]
     public partial int TestPropertyNumber { get; set; }
-    
+
     [RepoSteamRPC]
     public void DoExampleRPC(string message, Vector3 position)
     {
@@ -27,6 +27,4 @@ public partial class ExampleBehaviour : MonoBehaviour
             DoExample("Hello Mario", Random.insideUnitSphere);
         }
     }
-
-    public string ModGuid => PluginInfo.PLUGIN_GUID;
 }
