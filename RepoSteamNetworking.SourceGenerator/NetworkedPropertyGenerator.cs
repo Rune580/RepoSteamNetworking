@@ -99,7 +99,7 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
 
                 var propertyName = syntaxContext.TargetSymbol.Name.Trim();
 
-                var backingField = $"Internal{propertyName}BackingField".ToLowerCamelCaseWithUnderscore();
+                var backingField = $"{propertyName}_BackingField".ToLowerCamelCaseWithUnderscore();
                 
                 return new NetworkedPropertyContext
                 {
