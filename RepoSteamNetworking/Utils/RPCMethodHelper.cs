@@ -27,7 +27,7 @@ internal class RPCMethodHelper
         var methodHashcode = GetHashcodeFromMethod(methodName, parameterTypes);
         if (!cache.TryGetValue(methodHashcode, out var info))
         {
-            const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy;
             
             cache[methodHashcode] = info = target.GetType().GetMethod(
                 methodName,

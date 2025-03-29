@@ -78,7 +78,7 @@ public class SubIdentityImplementationTests
 
         var requiredCode = GetRequiredCode();
 
-        var runner = new CSharpSourceGeneratorVerifier<SteamNetworkSubIdentityImplementerGenerator>.Test
+        var runner = new CSharpSourceGeneratorVerifier<SteamNetworkSubIdentityImplementerGenerator>.TestRunner
         {
             TestState =
             {
@@ -107,7 +107,7 @@ public class SubIdentityImplementationTests
 
         var requiredCode = GetRequiredCode();
 
-        var runner = new CSharpSourceGeneratorVerifier<SteamNetworkSubIdentityImplementerGenerator>.Test
+        var runner = new CSharpSourceGeneratorVerifier<SteamNetworkSubIdentityImplementerGenerator>.TestRunner
         {
             TestState =
             {

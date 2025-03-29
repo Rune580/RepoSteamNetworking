@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 
 namespace RepoSteamNetworking.Testing;
 
-public partial class ExampleBehaviour : MonoBehaviour, INetworkedPropertyListener
+public partial class ExampleBehaviour : MonoBehaviour
 {
     [NetworkedProperty]
     public int testFieldNumber;
@@ -26,10 +26,5 @@ public partial class ExampleBehaviour : MonoBehaviour, INetworkedPropertyListene
         {
             DoExample("Hello Mario", Random.insideUnitSphere);
         }
-    }
-
-    public virtual void OnNetworkedPropertyReceived()
-    {
-        
     }
 }

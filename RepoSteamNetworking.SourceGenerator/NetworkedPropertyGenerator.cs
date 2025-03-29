@@ -33,6 +33,14 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
             {
                 var containingClass = syntaxContext.TargetSymbol.ContainingType;
                 var containingNamespace = containingClass.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+
+                var baseType = containingClass.BaseType;
+                var baseTypeTree = containingClass.Name;
+                while (baseType is not null)
+                {
+                    baseTypeTree = $"{baseType.Name}.{baseTypeTree}";
+                    baseType = baseType.BaseType;
+                }
                 
                 var attr = syntaxContext.Attributes[0];
                 var propertyName = attr.NamedArguments.Where(kvp => kvp.Key == "OverridePropertyName")
@@ -71,6 +79,7 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                     TypeName = type,
                     Namespace = containingNamespace,
                     ClassName = containingClass.Name,
+                    BaseTypeTree = baseTypeTree,
                 };
             }
         );
@@ -88,6 +97,14 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
             {
                 var containingClass = syntaxContext.TargetSymbol.ContainingType;
                 var containingNamespace = containingClass.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+
+                var baseType = containingClass.BaseType;
+                var baseTypeTree = containingClass.Name;
+                while (baseType is not null)
+                {
+                    baseTypeTree = $"{baseType.Name}.{baseTypeTree}";
+                    baseType = baseType.BaseType;
+                }
                 
                 var propertySymbol = (IPropertySymbol)syntaxContext.TargetSymbol;
                 var propertySyntax = (BasePropertyDeclarationSyntax)syntaxContext.TargetNode;
@@ -110,6 +127,7 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                     Namespace = containingNamespace,
                     ClassName = containingClass.Name,
                     NeedsField = true,
+                    BaseTypeTree = baseTypeTree,
                 };
             }
         );
@@ -127,6 +145,28 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                 foreach (var prop in pair.Right)
                     props[i++] = prop;
                 
+                // Hacky solution to figure out if a class containing a networked property inherits another class that also contains a networked property.
+                // Since we need to implement an interface on the base class and allow inheriting classes to override the listener.
+                // Need to see if there's a better solution for this.
+                for (var j = 0; j < props.Length; j++)
+                {
+                    var prop = props[j];
+
+                    foreach (var subProp in props)
+                    {
+                        if (prop.FullClassName == subProp.FullClassName)
+                            continue;
+                        
+                        if (!prop.BaseTypeTree.Contains(subProp.BaseTypeTree))
+                            continue;
+
+                        prop.HasNetworkPropertyListener = true;
+                        break;
+                    }
+                    
+                    props[j] = prop;
+                }
+
                 return props.ToImmutableArray();
             });
         
@@ -143,12 +183,14 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
 
             var code = new CodeBuilder();
             
-            code.WithNamespace(props[0].Namespace);
+            code.WithImports("RepoSteamNetworking.API.Unity", "RepoSteamNetworking.Networking.NetworkedProperties")
+                .WithNamespace(props[0].Namespace);
 
-            code.AppendLine($"partial class {props[0].ClassName}\n{{");
-
-            foreach (var prop in props)
+            code.AppendLine($"partial class {props[0].ClassName} : INetworkedPropertyListener\n{{");
+            
+            for (var i = 0; i < props.Length; i++)
             {
+                var prop = props[i];
                 var modifiers = prop.Modifiers.Aggregate("", (current, modifier) => current + $"{modifier} ")
                     .Trim();
 
@@ -160,8 +202,43 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                     .AppendLine("set\n{")
                     .AppendLine($"if ({prop.BackingFieldName} == value)\n{{\nreturn;\n}}")
                     .AppendLine($"{prop.BackingFieldName} = value;")
+                    .AppendLine($"SendNetworkedPropertyData({prop.BackingFieldName}, {i});")
                     .AppendLine("}\n}");
             }
+
+            code.AppendLine("private void SendNetworkedPropertyData(object value, uint propId)\n{")
+                .AppendLine("var networkIdentity = GetNetworkIdentity();")
+                .AppendLine($"NetworkedPropertyManager.AddNetworkedPropertyDataToQueue(value, networkIdentity.NetworkId, ModGuid, SubId, \"{group.Key}\", propId);")
+                .AppendLine("}");
+
+            if (props[0].HasNetworkPropertyListener)
+            {
+                code.AppendLine("public override void OnNetworkedPropertyReceived()\n{")
+                    .AppendLine("base.OnNetworkedPropertyReceived();");
+            }
+            else
+            {
+                code.AppendLine("public virtual void OnNetworkedPropertyReceived()\n{");
+            }
+
+            // TODO implement receiving and setting property data.
+            code.AppendLine("")
+                .AppendLine("}");
+
+            code.AppendLine("private void SetNetworkedPropertyValue(uint propId, object value)\n{")
+                .AppendLine("switch (propId)\n{");
+            
+            for (int i = 0; i < props.Length; i++)
+            {
+                var prop = props[i];
+                
+                code.AppendLine($"case {i}:")
+                    .AppendLine($"{prop.BackingFieldName} = ({prop.TypeName})value;")
+                    .AppendLine("break;");
+            }
+            code.AppendLine("default:")
+                .AppendLine("break;")
+                .AppendLine("}\n}");
 
             var sourceText = code.ToSourceText();
             context.AddSource($"{group.Key}_NetworkedProperties.g.cs", sourceText);
@@ -177,6 +254,8 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
         public string Namespace { get; set; }
         public string ClassName { get; set; }
         public bool NeedsField { get; set; }
+        public string BaseTypeTree { get; set; }
+        public bool HasNetworkPropertyListener { get; set; }
         public string FullClassName => $"{Namespace}.{ClassName}";
     }
 }
