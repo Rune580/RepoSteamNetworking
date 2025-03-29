@@ -8,6 +8,7 @@ using RepoSteamNetworking.Networking.Registries;
 using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;
+using HarmonyLib;
 
 namespace RepoSteamNetworking.Networking;
 
@@ -35,16 +36,18 @@ internal class RepoNetworkSocketManager : SocketManager
     {
         base.OnConnected(connection, info);
 
-        AddNewSteamUserConnection(connection);
+        AddNewSteamUserConnection(connection, info);
     }
 
-    private void AddNewSteamUserConnection(Connection connection)
+    private void AddNewSteamUserConnection(Connection connection, ConnectionInfo info)
     {
-        var steamUserConnection = new SteamUserConnection(connection);
+        var steamUserConnection = new SteamUserConnection(connection, info);
+        ulong steamId = Traverse.Create(info).Field<NetIdentity>("identity").Value.SteamId.Value;
 
         var index = _steamUserConnections.Count;
         _connectionIdSteamUserConnectionLut[connection.Id] = index;
-        
+        _steamIdSteamUserConnectionLut[steamId] = index;
+
         _steamUserConnections.Add(steamUserConnection);
         
         steamUserConnection.StartVerification();
@@ -133,9 +136,7 @@ internal class RepoNetworkSocketManager : SocketManager
             
             if (userConnection.VerifyAuth(handshakePacket))
             {
-                userConnection.SetVerifiedWithSteamId(handshakePacket.PlayerId);
-                var index = _steamUserConnections.IndexOf(userConnection);
-                _steamIdSteamUserConnectionLut[handshakePacket.PlayerId] = index;
+                userConnection.SetVerified();
                 
                 SendHandshakeStatus(header.Sender, true);
                 userConnection.StartModListValidation();
