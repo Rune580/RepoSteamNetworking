@@ -32,13 +32,26 @@ public static class RepoSteamNetwork
 
     private static readonly RPCMethodHelper RPCHelper = new();
 
-    internal static void OnHostReceivedMessage(byte[] data)
+    internal static void OnHostReceivedMessage(byte[] data, Connection connection, NetIdentity identity)
     {
         var message = new SocketMessage(data);
         var header = message.ReadPacketHeader();
+        var sender = identity.SteamId;
         
         var packet = NetworkPacketRegistry.CreatePacket(header.PacketId);
         packet.Header = header;
+
+        if (identity.IsSteamId && header.Sender != sender)
+        {
+            Logging.Warn($"{SteamIdUtils.GetLobbyName(sender)} sent the incorrect SteamID {header.Sender} for their connection! Dropping connection...");
+            if (RepoNetworkingServer.Instance.SocketManager!.TryGetSteamUserConnection(sender, out var userConnection))
+            {
+                userConnection.Close();
+                return;
+            }
+            connection.Close();
+            return;
+        }
 
         if (header.Destination == NetworkDestination.HostOnly)
         {

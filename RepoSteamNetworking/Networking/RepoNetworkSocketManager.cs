@@ -138,7 +138,7 @@ internal class RepoNetworkSocketManager : SocketManager
             {
                 userConnection.SetVerified();
                 
-                SendHandshakeStatus(header.Sender, true);
+                SendHandshakeStatus(identity.SteamId, true);
                 userConnection.StartModListValidation();
                 
                 return;
@@ -146,7 +146,7 @@ internal class RepoNetworkSocketManager : SocketManager
             
             Logging.Warn($"Handshake failed!");
             
-            SendHandshakeStatus(header.Sender, false);
+            SendHandshakeStatus(identity.SteamId, false);
             return;
         }
 
@@ -164,7 +164,7 @@ internal class RepoNetworkSocketManager : SocketManager
             }
         }
         
-        RepoSteamNetwork.OnHostReceivedMessage(bytes);
+        RepoSteamNetwork.OnHostReceivedMessage(bytes, connection, identity);
     }
 
     private void SendHandshakeStatus(SteamId target, bool success)
