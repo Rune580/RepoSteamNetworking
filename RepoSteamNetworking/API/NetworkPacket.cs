@@ -1,7 +1,7 @@
 using RepoSteamNetworking.Networking;
-using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Networking.Registries;
+using RepoSteamNetworking.Networking.Serialization;
 using RepoSteamNetworking.Utils;
 using Steamworks;
 

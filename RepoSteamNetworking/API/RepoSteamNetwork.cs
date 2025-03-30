@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using BepInEx;
@@ -6,9 +7,9 @@ using RepoSteamNetworking.API.Asset;
 using RepoSteamNetworking.API.Unity;
 using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking;
-using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Networking.Registries;
+using RepoSteamNetworking.Networking.Serialization;
 using RepoSteamNetworking.Networking.Unity;
 using RepoSteamNetworking.Utils;
 using Steamworks;
@@ -139,6 +140,13 @@ public static class RepoSteamNetwork
         }
 
         VersionCompatRegistry.RegisterMod(pluginInfo.GUID, pluginInfo.Version, new RSNVersionCompatibilityAttribute(compatibility, optional));
+    }
+
+    public static void SendPackets<TPacket>(IEnumerable<TPacket> packets, NetworkDestination destination = NetworkDestination.PacketTarget)
+        where TPacket : NetworkPacket
+    {
+        foreach (var packet in packets)
+            SendPacket(packet, destination);
     }
 
     public static void SendPacket<TPacket>(TPacket packet, NetworkDestination destination = NetworkDestination.Everyone)

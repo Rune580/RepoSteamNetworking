@@ -3,6 +3,7 @@ using RepoSteamNetworking.API;
 using RepoSteamNetworking.API.Asset;
 using RepoSteamNetworking.API.Unity;
 using RepoSteamNetworking.Networking.Data;
+using RepoSteamNetworking.Networking.NetworkedProperties;
 using RepoSteamNetworking.Networking.Registries;
 using RepoSteamNetworking.Utils;
 using UnityEngine;
@@ -12,11 +13,17 @@ namespace RepoSteamNetworking.Networking.Unity;
 
 public class RepoSteamNetworkManager : MonoBehaviour
 {
+    // TODO: Look into making this be something dynamic/configurable.
+    private const float NetworkPropertySyncInterval = 0.25f;
+    
     private static RepoSteamNetworkManager? _instance;
     public static RepoSteamNetworkManager Instance => _instance;
     
     private readonly Dictionary<uint, RepoSteamNetworkIdentity> _networkObjects = new();
-    private ModNetworkGuidPalette _palette = new();
+    private ModNetworkGuidPalette _guidPalette = new();
+    private BehaviourIdPalette _behaviourIdPalette = new();
+
+    private float _networkPropertySyncTimer;
         
     internal uint NewNetworkId => field++;
     
@@ -30,6 +37,13 @@ public class RepoSteamNetworkManager : MonoBehaviour
 
     private void Update()
     {
+        _networkPropertySyncTimer += Time.deltaTime;
+        while (_networkPropertySyncTimer >= NetworkPropertySyncInterval)
+        {
+            _networkPropertySyncTimer -= NetworkPropertySyncInterval;
+            NetworkedPropertyManager.SyncNetworkedProperties();
+        }
+        
         if (Keyboard.current.hKey.wasPressedThisFrame)
         {
             if (!RepoNetworkingServer.Instance.ServerActive)
@@ -60,11 +74,17 @@ public class RepoSteamNetworkManager : MonoBehaviour
         _networkObjects.Remove(networkIdentity.NetworkId);
     }
     
-    internal void SetModGuidPalette(ModNetworkGuidPalette palette) => _palette = palette;
-
-    internal string GetModGuid(uint paletteId) => _palette.GetModGuid(paletteId);
+    internal void SetModGuidPalette(ModNetworkGuidPalette palette) => _guidPalette = palette;
     
-    internal uint GetGuidPaletteId(string modGuid) => _palette.GetPaletteId(modGuid);
+    internal void SetBehaviourIdPalette(BehaviourIdPalette palette) => _behaviourIdPalette = palette;
+
+    internal string GetModGuid(uint paletteId) => _guidPalette.GetModGuid(paletteId);
+    
+    internal uint GetGuidPaletteId(string modGuid) => _guidPalette.GetPaletteId(modGuid);
+
+    public string GetBehaviourClassName(uint behaviourId) => _behaviourIdPalette.GetClassName(behaviourId);
+    
+    public uint GetBehaviourId(string fullyQualifiedClassName) => _behaviourIdPalette.GetBehaviourId(fullyQualifiedClassName);
     
     internal RepoSteamNetworkIdentity GetNetworkIdentity(uint networkId) => _networkObjects[networkId];
 

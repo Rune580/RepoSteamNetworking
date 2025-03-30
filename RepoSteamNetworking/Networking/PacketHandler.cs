@@ -87,9 +87,10 @@ internal static class PacketHandler
         userConnection.SetValidated();
         
         // Send ModNetworkGuidPalette to client
-        var palettePacket = new SetConnectionModNetworkGuidPalettePacket
+        var palettePacket = new SetConnectionPalettesPacket
         {
-            Palette = ModNetworkGuidRegistry.Palette
+            GuidPalette = ModNetworkGuidRegistry.Palette,
+            BehaviourIdPalette = BehaviourIdRegistry.Palette,
         };
         userConnection.SendPacket(palettePacket);
     }
@@ -119,9 +120,10 @@ internal static class PacketHandler
         Logging.Warn("There's a mismatch in mods and or mod versions! You are responsible for any issues you may encounter!");
     }
 
-    public static void OnSetConnectionModNetworkGuidPaletteReceived(SetConnectionModNetworkGuidPalettePacket packet)
+    public static void OnSetConnectionPalettesReceived(SetConnectionPalettesPacket packet)
     {
-        RepoSteamNetworkManager.Instance.SetModGuidPalette(packet.Palette);
+        RepoSteamNetworkManager.Instance.SetModGuidPalette(packet.GuidPalette);
+        RepoSteamNetworkManager.Instance.SetBehaviourIdPalette(packet.BehaviourIdPalette);
     }
 
     public static void OnCallRPCPacketReceived(CallRPCPacket packet)

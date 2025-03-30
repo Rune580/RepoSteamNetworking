@@ -2,6 +2,7 @@ using RepoSteamNetworking.API;
 using RepoSteamNetworking.API.Asset;
 using RepoSteamNetworking.API.Unity;
 using RepoSteamNetworking.Networking.Data;
+using RepoSteamNetworking.Networking.Serialization;
 using RepoSteamNetworking.Utils;
 using UnityEngine;
 

@@ -1,4 +1,5 @@
 using System;
+using RepoSteamNetworking.Networking.NetworkedProperties;
 
 namespace RepoSteamNetworking.API.Unity;
 
@@ -6,4 +7,6 @@ namespace RepoSteamNetworking.API.Unity;
 public class NetworkedPropertyAttribute : Attribute
 {
     public string OverridePropertyName { get; set; } = string.Empty;
+    
+    public VariableChangeKind SendMethod { get; set; } = VariableChangeKind.Set;
 }

@@ -1,6 +1,7 @@
 namespace RepoSteamNetworking.Networking.NetworkedProperties;
 
-internal struct NetworkedVariableChange
+public enum VariableChangeKind : byte
 {
-    
+    Set,
+    Delta
 }

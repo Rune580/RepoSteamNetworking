@@ -1,4 +1,5 @@
 using RepoSteamNetworking.API.Unity;
+using RepoSteamNetworking.Networking.NetworkedProperties;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Random = UnityEngine.Random;
@@ -7,7 +8,7 @@ namespace RepoSteamNetworking.Testing;
 
 public partial class ExampleBehaviour : MonoBehaviour
 {
-    [NetworkedProperty]
+    [NetworkedProperty(SendMethod = VariableChangeKind.Delta)]
     public int testFieldNumber;
 
     [NetworkedProperty]

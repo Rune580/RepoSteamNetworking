@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using RepoSteamNetworking.API;
 using RepoSteamNetworking.API.VersionCompat;
-using RepoSteamNetworking.Networking.Data;
+using RepoSteamNetworking.Networking.Serialization;
 
 namespace RepoSteamNetworking.Networking.Packets;
 

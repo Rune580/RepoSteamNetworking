@@ -1,5 +1,5 @@
 using RepoSteamNetworking.API;
-using RepoSteamNetworking.Networking.Data;
+using RepoSteamNetworking.Networking.Serialization;
 using Steamworks;
 using Steamworks.Data;
 

@@ -8,6 +8,7 @@ using RepoSteamNetworking.API;
 using RepoSteamNetworking.API.Asset;
 using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking;
+using RepoSteamNetworking.Networking.NetworkedProperties;
 using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Utils;
 using UnityEngine;
@@ -46,11 +47,14 @@ public class RepoSteamNetworkingPlugin : BaseUnityPlugin
         RepoSteamNetwork.RegisterPacket<ServerModVersionRegistryStatusPacket>();
         RepoSteamNetwork.AddCallback<ServerModVersionRegistryStatusPacket>(PacketHandler.OnServerModVersionRegistryReceived);
         
-        RepoSteamNetwork.RegisterPacket<SetConnectionModNetworkGuidPalettePacket>();
-        RepoSteamNetwork.AddCallback<SetConnectionModNetworkGuidPalettePacket>(PacketHandler.OnSetConnectionModNetworkGuidPaletteReceived);
+        RepoSteamNetwork.RegisterPacket<SetConnectionPalettesPacket>();
+        RepoSteamNetwork.AddCallback<SetConnectionPalettesPacket>(PacketHandler.OnSetConnectionPalettesReceived);
         
         RepoSteamNetwork.RegisterPacket<CallRPCPacket>();
         RepoSteamNetwork.AddCallback<CallRPCPacket>(PacketHandler.OnCallRPCPacketReceived);
+        
+        RepoSteamNetwork.RegisterPacket<NetworkedPropertiesDataPacket>();
+        RepoSteamNetwork.AddCallback<NetworkedPropertiesDataPacket>(NetworkedPropertyManager.OnNetworkedPropertiesPacketReceived);
 
         RepoSteamNetwork.RegisterPacket<InstantiateNetworkedPrefabServerPacket>();
         RepoSteamNetwork.AddCallback<InstantiateNetworkedPrefabServerPacket>(PacketHandler.OnInstantiateNetworkedPrefabServerPacketReceived);

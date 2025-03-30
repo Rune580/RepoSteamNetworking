@@ -3,7 +3,7 @@ using System.IO;
 using RepoSteamNetworking.Networking.Packets;
 using Sirenix.Serialization;
 
-namespace RepoSteamNetworking.Networking.Data;
+namespace RepoSteamNetworking.Networking.Serialization;
 
 public class SocketMessage : IDisposable
 {
