@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Timers;
 using RepoSteamNetworking.API;
 using RepoSteamNetworking.Networking.Packets;
@@ -14,6 +13,8 @@ public class SteamUserConnection : IEquatable<SteamUserConnection>
 {
     private string _clientKey = "";
     private Connection _connection;
+    private ConnectionInfo _info;
+    private NetIdentity _identity;
     private readonly Timer _timer;
 
     public uint ConnectionId => _connection.Id;
@@ -21,6 +22,8 @@ public class SteamUserConnection : IEquatable<SteamUserConnection>
     public SteamId SteamId { get; private set; }
     
     public ConnectionStatus Status { get; private set; }
+
+    public ConnectionState State => _info.State;
 
     public string UserName
     {
@@ -33,13 +36,25 @@ public class SteamUserConnection : IEquatable<SteamUserConnection>
         }
     } = "";
 
-    internal SteamUserConnection(Connection connection)
+    internal SteamUserConnection(Connection connection, ConnectionInfo info)
     {
         _connection = connection;
+        _info = info;
         _timer = new Timer(10000);
         _timer.AutoReset = false;
 
         Status = ConnectionStatus.Unverified;
+
+        _identity = info.identity;
+
+        if (_identity.IsSteamId)
+        {
+            SteamId = _identity.SteamId;
+        }
+        else
+        {
+            Logging.Error("NetIdentity was not a SteamID");
+        }
     }
 
     internal void StartVerification()
@@ -82,15 +97,14 @@ public class SteamUserConnection : IEquatable<SteamUserConnection>
         if (lobby.Id != packet.LobbyId)
             return false;
 
-        if (lobby.Members.Any(member => member.Id == packet.PlayerId))
+        if (SteamId == packet.PlayerId)
             return true;
         
         return false;
     }
 
-    internal void SetVerifiedWithSteamId(SteamId steamId)
+    internal void SetVerified()
     {
-        SteamId = steamId;
         Status = ConnectionStatus.Verified;
         
         Logging.Info($"Connection {ConnectionId} is now verified as Client {UserName}!");

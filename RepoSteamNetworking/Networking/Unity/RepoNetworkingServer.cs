@@ -93,6 +93,8 @@ public class RepoNetworkingServer : MonoBehaviour
         var connected = SocketManager.UserConnections;
         foreach (var connection in connected)
         {
+            if (connection.State is not ConnectionState.Connected)
+                continue;
             var result = connection.SendMessage(message.GetBytes());
         }
     }
@@ -108,6 +110,12 @@ public class RepoNetworkingServer : MonoBehaviour
         if (!SocketManager.TryGetSteamUserConnection(target, out var connection))
         {
             Logging.Info($"No valid connection found for {target}!");
+            return;
+        }
+
+        if (connection.State is not ConnectionState.Connected)
+        {
+            Logging.Info($"Can't send message to unconnected client {target}");
             return;
         }
         

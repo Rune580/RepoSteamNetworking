@@ -35,16 +35,18 @@ internal class RepoNetworkSocketManager : SocketManager
     {
         base.OnConnected(connection, info);
 
-        AddNewSteamUserConnection(connection);
+        AddNewSteamUserConnection(connection, info);
     }
 
-    private void AddNewSteamUserConnection(Connection connection)
+    private void AddNewSteamUserConnection(Connection connection, ConnectionInfo info)
     {
-        var steamUserConnection = new SteamUserConnection(connection);
+        var steamUserConnection = new SteamUserConnection(connection, info);
+        var steamId = info.identity.SteamId.Value;
 
         var index = _steamUserConnections.Count;
         _connectionIdSteamUserConnectionLut[connection.Id] = index;
-        
+        _steamIdSteamUserConnectionLut[steamId] = index;
+
         _steamUserConnections.Add(steamUserConnection);
         
         steamUserConnection.StartVerification();
@@ -133,11 +135,9 @@ internal class RepoNetworkSocketManager : SocketManager
             
             if (userConnection.VerifyAuth(handshakePacket))
             {
-                userConnection.SetVerifiedWithSteamId(handshakePacket.PlayerId);
-                var index = _steamUserConnections.IndexOf(userConnection);
-                _steamIdSteamUserConnectionLut[handshakePacket.PlayerId] = index;
+                userConnection.SetVerified();
                 
-                SendHandshakeStatus(header.Sender, true);
+                SendHandshakeStatus(identity.SteamId, true);
                 userConnection.StartModListValidation();
                 
                 return;
@@ -145,7 +145,7 @@ internal class RepoNetworkSocketManager : SocketManager
             
             Logging.Warn($"Handshake failed!");
             
-            SendHandshakeStatus(header.Sender, false);
+            SendHandshakeStatus(identity.SteamId, false);
             return;
         }
 
@@ -163,7 +163,7 @@ internal class RepoNetworkSocketManager : SocketManager
             }
         }
         
-        RepoSteamNetwork.OnHostReceivedMessage(bytes);
+        RepoSteamNetwork.OnHostReceivedMessage(bytes, connection, identity);
     }
 
     private void SendHandshakeStatus(SteamId target, bool success)
