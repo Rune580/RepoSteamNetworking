@@ -8,7 +8,6 @@ using RepoSteamNetworking.Networking.Registries;
 using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;
-using HarmonyLib;
 
 namespace RepoSteamNetworking.Networking;
 
@@ -42,7 +41,7 @@ internal class RepoNetworkSocketManager : SocketManager
     private void AddNewSteamUserConnection(Connection connection, ConnectionInfo info)
     {
         var steamUserConnection = new SteamUserConnection(connection, info);
-        ulong steamId = Traverse.Create(info).Field<NetIdentity>("identity").Value.SteamId.Value;
+        var steamId = info.identity.SteamId.Value;
 
         var index = _steamUserConnections.Count;
         _connectionIdSteamUserConnectionLut[connection.Id] = index;
