@@ -6,7 +6,6 @@ using RepoSteamNetworking.Networking.Unity;
 using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;
-using HarmonyLib;
 
 namespace RepoSteamNetworking.Networking;
 
@@ -46,7 +45,7 @@ public class SteamUserConnection : IEquatable<SteamUserConnection>
 
         Status = ConnectionStatus.Unverified;
 
-        _identity = Traverse.Create(info).Field<NetIdentity>("identity").Value;
+        _identity = info.identity;
 
         if (_identity.IsSteamId)
         {
