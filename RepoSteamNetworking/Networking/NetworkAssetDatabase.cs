@@ -25,37 +25,37 @@ internal static class NetworkAssetDatabase
         return bundleRef;
     }
 
-    public static T? LoadAsset<T>(AssetReference assetRef)
+    public static T? LoadAsset<T>(PrefabReference prefabRef)
         where T : Object
     {
-        if (!AssetBundles.TryGetValue(assetRef.BundleReference, out var networkBundle))
+        if (!AssetBundles.TryGetValue(prefabRef.BundleReference, out var networkBundle))
         {
-            Logging.Error($"Failed to find AssetBundle with reference: {assetRef.BundleReference}");
+            Logging.Error($"Failed to find AssetBundle with reference: {prefabRef.BundleReference}");
             return null;
         }
 
         if (networkBundle.Managed) // TODO
             return null;
 
-        return networkBundle.Bundle.LoadAsset<T>(assetRef.assetPath);
+        return networkBundle.Bundle.LoadAsset<T>(prefabRef.assetPath);
     }
 
-    public static AssetBundleRequest? LoadAssetAsync<T>(AssetReference assetRef)
+    public static AssetBundleRequest? LoadAssetAsync<T>(PrefabReference prefabRef)
         where T : Object
     {
-        if (!AssetBundles.TryGetValue(assetRef.BundleReference, out var networkBundle))
+        if (!AssetBundles.TryGetValue(prefabRef.BundleReference, out var networkBundle))
         {
-            Logging.Error($"Failed to find AssetBundle with reference: {assetRef.BundleReference}");
+            Logging.Error($"Failed to find AssetBundle with reference: {prefabRef.BundleReference}");
             return null;
         }
 
         if (networkBundle.Managed) // TODO
             return null;
 
-        return networkBundle.Bundle.LoadAssetAsync<T>(assetRef.assetPath);
+        return networkBundle.Bundle.LoadAssetAsync<T>(prefabRef.assetPath);
     }
 
-    public static IEnumerable<AssetReference> GetAllAssets(AssetBundleReference bundleRef)
+    public static IEnumerable<PrefabReference> GetAllAssets(AssetBundleReference bundleRef)
     {
         var networkBundle = AssetBundles[bundleRef];
         var bundle = networkBundle.Bundle;

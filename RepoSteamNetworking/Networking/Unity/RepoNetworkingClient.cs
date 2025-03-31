@@ -25,6 +25,8 @@ public class RepoNetworkingClient : MonoBehaviour
         }
         
         VersionCompatRegistry.InitRegistry();
+        ModNetworkGuidRegistry.Init();
+        BehaviourIdRegistry.Init();
         
         Instantiate(new GameObject("RepoNetworkingClient"), parent.transform)
             .AddComponent<RepoNetworkingClient>();
@@ -72,11 +74,9 @@ public class RepoNetworkingClient : MonoBehaviour
         }
 
         var result = _connectionManager.Connection.SendMessage(message.GetBytes());
-        
-        // Logging.Info($"[SendMessageToServer] Result: {result}");
     }
 
-    public void SetConnectionVerified(bool verified)
+    internal void SetConnectionVerified(bool verified)
     {
         if (_connectionManager is null)
             return;

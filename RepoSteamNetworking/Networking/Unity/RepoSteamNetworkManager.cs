@@ -5,6 +5,7 @@ using RepoSteamNetworking.API.Unity;
 using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.NetworkedProperties;
 using RepoSteamNetworking.Networking.Registries;
+using RepoSteamNetworking.Testing;
 using RepoSteamNetworking.Utils;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -52,9 +53,14 @@ public class RepoSteamNetworkManager : MonoBehaviour
             var player = PlayerAvatar.instance;
             var pos = player.transform.position;
 
-            var prefab = RepoSteamNetworkingPlugin.TestBundle.GetAssetReference("assets/Example Object.prefab");
+            var prefabRef = RepoSteamNetworkingPlugin.TestBundle.GetAssetReference("assets/Example Object.prefab");
 
-            RepoSteamNetwork.InstantiatePrefab(prefab, pos);
+            prefabRef = prefabRef.WithModifications(prefab =>
+            {
+                prefab.AddComponent<ExampleBehaviour>();
+            });
+
+            RepoSteamNetwork.InstantiatePrefab(prefabRef, pos);
         }
     }
 
@@ -88,12 +94,12 @@ public class RepoSteamNetworkManager : MonoBehaviour
     
     internal RepoSteamNetworkIdentity GetNetworkIdentity(uint networkId) => _networkObjects[networkId];
 
-    internal void InstantiateNetworkPrefab(uint networkId, AssetReference assetRef, Vector3 position, Quaternion rotation)
+    internal void InstantiateNetworkPrefab(uint networkId, PrefabReference prefabRef, Vector3 position, Quaternion rotation)
     {
-        var prefab = NetworkAssetDatabase.LoadAsset<GameObject>(assetRef);
+        var prefab = NetworkAssetDatabase.LoadAsset<GameObject>(prefabRef);
         if (prefab is null)
         {
-            Logging.Error($"Failed to instantiate network prefab {assetRef.ToString()}! Verify the asset path and make sure you registered the AssetBundle!");
+            Logging.Error($"Failed to instantiate network prefab {prefabRef.ToString()}! Verify the asset path and make sure you registered the AssetBundle!");
             return;
         }
         var wasPrefabActive = prefab.activeSelf;
@@ -107,12 +113,12 @@ public class RepoSteamNetworkManager : MonoBehaviour
         prefab.SetActive(wasPrefabActive);
     }
 
-    internal void InstantiateNetworkPrefab(uint networkId, AssetReference assetRef, NetworkTransform targetTransform, Vector3 position, Quaternion rotation)
+    internal void InstantiateNetworkPrefab(uint networkId, PrefabReference prefabRef, NetworkTransform targetTransform, Vector3 position, Quaternion rotation)
     {
-        var prefab = NetworkAssetDatabase.LoadAsset<GameObject>(assetRef);
+        var prefab = NetworkAssetDatabase.LoadAsset<GameObject>(prefabRef);
         if (prefab is null)
         {
-            Logging.Error($"Failed to instantiate network prefab {assetRef.ToString()}! Verify the asset path and make sure you registered the AssetBundle!");
+            Logging.Error($"Failed to instantiate network prefab {prefabRef.ToString()}! Verify the asset path and make sure you registered the AssetBundle!");
             return;
         }
         var wasPrefabActive = prefab.activeSelf;
@@ -149,6 +155,7 @@ public class RepoSteamNetworkManager : MonoBehaviour
         
         VersionCompatRegistry.InitRegistry();
         ModNetworkGuidRegistry.Init();
+        BehaviourIdRegistry.Init();
         
         Instantiate(new GameObject("RepoSteamNetworkManager"), parent.transform)
             .AddComponent<RepoSteamNetworkManager>();

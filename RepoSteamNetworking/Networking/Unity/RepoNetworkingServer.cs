@@ -19,8 +19,6 @@ public class RepoNetworkingServer : MonoBehaviour
     
     internal bool ServerActive => _instance is not null && _serverActive;
     
-    // internal string AuthKey => CurrentLobby.GetMemberData(CurrentLobby.Owner, "RSN_Auth_Key");
-    
     internal static void CreateSingleton(GameObject parent)
     {
         if (_instance is not null)
@@ -31,6 +29,7 @@ public class RepoNetworkingServer : MonoBehaviour
         
         VersionCompatRegistry.InitRegistry();
         ModNetworkGuidRegistry.Init();
+        BehaviourIdRegistry.Init();
         
         Instantiate(new GameObject("RepoNetworkingServer"), parent.transform)
             .AddComponent<RepoNetworkingServer>();

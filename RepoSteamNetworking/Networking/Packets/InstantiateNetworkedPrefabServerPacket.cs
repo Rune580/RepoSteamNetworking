@@ -10,7 +10,7 @@ namespace RepoSteamNetworking.Networking.Packets;
 
 internal class InstantiateNetworkedPrefabServerPacket : NetworkPacket<InstantiateNetworkedPrefabServerPacket>
 {
-    public AssetReference Prefab { get; set; }
+    public PrefabReference Prefab { get; set; }
     public bool HasTarget { get; private set; }
     public NetworkTransform TargetTransform { get; private set; }
     public Vector3 Position { get; set; }
@@ -49,7 +49,7 @@ internal class InstantiateNetworkedPrefabServerPacket : NetworkPacket<Instantiat
 
     protected override void ReadData(SocketMessage socketMessage)
     {
-        Prefab = socketMessage.Read<AssetReference>();
+        Prefab = socketMessage.Read<PrefabReference>();
         HasTarget = socketMessage.Read<bool>();
         if (HasTarget)
             TargetTransform = socketMessage.Read<NetworkTransform>();

@@ -4,6 +4,7 @@ using RepoSteamNetworking.API;
 using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Networking.Registries;
 using RepoSteamNetworking.Networking.Serialization;
+using RepoSteamNetworking.Networking.Unity;
 using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;
@@ -74,10 +75,7 @@ internal class RepoNetworkConnectionManager : ConnectionManager
             
             Logging.Info("Sending handshake to server to verify connection!");
             
-            var handshakePacket = new HandshakeAuthConnectionPacket();
-            handshakePacket.SetData(_currentLobby, startAuthPacket.ClientKey);
-            RepoSteamNetwork.SendPacket(handshakePacket, NetworkDestination.HostOnly);
-            
+            ClientAuthHandshakeOneShot.Run(startAuthPacket.ClientKey);
             return;
         }
         

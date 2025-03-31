@@ -9,10 +9,11 @@ namespace RepoSteamNetworking.Testing;
 public partial class ExampleBehaviour : MonoBehaviour
 {
     [NetworkedProperty(SendMethod = VariableChangeKind.Delta)]
-    public int testFieldNumber;
+    public float testFieldNumber;
 
     [NetworkedProperty]
     public partial int TestPropertyNumber { get; set; }
+    
 
     [RepoSteamRPC]
     public void DoExampleRPC(string message, Vector3 position)
@@ -26,6 +27,22 @@ public partial class ExampleBehaviour : MonoBehaviour
         if (Keyboard.current.bKey.wasPressedThisFrame)
         {
             DoExample("Hello Mario", Random.insideUnitSphere);
+        }
+
+        if (Keyboard.current.upArrowKey.isPressed)
+        {
+            TestFieldNumber += 2f * Time.deltaTime;
+        }
+
+        if (Keyboard.current.downArrowKey.wasPressedThisFrame)
+        {
+            TestPropertyNumber -= 1;
+        }
+        
+        if (Keyboard.current.jKey.wasPressedThisFrame)
+        {
+            var networkIdentity = GetNetworkIdentity();
+            Debug.Log($"Example Object: NetId: {networkIdentity.NetworkId}, SubId: {SubId}, TestFieldNumber: {TestFieldNumber}, TestPropertyNumber: {TestPropertyNumber}");
         }
     }
 }

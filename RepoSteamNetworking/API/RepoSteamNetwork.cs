@@ -207,21 +207,21 @@ public static class RepoSteamNetwork
         RPCHelper.InvokeRPC(subIdentity, methodName, parameters);
     }
     
-    public static void InstantiatePrefab(AssetReference prefab) => InstantiatePrefab(prefab, Vector3.zero, Quaternion.identity);
+    public static void InstantiatePrefab(PrefabReference prefab) => InstantiatePrefab(prefab, Vector3.zero, Quaternion.identity);
     
-    public static void InstantiatePrefab(AssetReference prefab, Quaternion rotation) => InstantiatePrefab(prefab, Vector3.zero, rotation);
+    public static void InstantiatePrefab(PrefabReference prefab, Quaternion rotation) => InstantiatePrefab(prefab, Vector3.zero, rotation);
 
-    public static void InstantiatePrefab(AssetReference prefab, Vector3 position) => InstantiatePrefab(prefab, position, Quaternion.identity);
+    public static void InstantiatePrefab(PrefabReference prefab, Vector3 position) => InstantiatePrefab(prefab, position, Quaternion.identity);
     
-    public static void InstantiatePrefab(AssetReference prefab, Vector3 position, Quaternion rotation) => InstantiatePrefab(prefab, null,  position, rotation);
+    public static void InstantiatePrefab(PrefabReference prefab, Vector3 position, Quaternion rotation) => InstantiatePrefab(prefab, null,  position, rotation);
     
-    public static void InstantiatePrefab(AssetReference prefab, Transform target) => InstantiatePrefab(prefab, target, Vector3.zero, Quaternion.identity);
+    public static void InstantiatePrefab(PrefabReference prefab, Transform target) => InstantiatePrefab(prefab, target, Vector3.zero, Quaternion.identity);
     
-    public static void InstantiatePrefab(AssetReference prefab, Transform target, Vector3 position) => InstantiatePrefab(prefab, target, position, Quaternion.identity);
+    public static void InstantiatePrefab(PrefabReference prefab, Transform target, Vector3 position) => InstantiatePrefab(prefab, target, position, Quaternion.identity);
     
-    public static void InstantiatePrefab(AssetReference prefab, Transform target, Quaternion rotation) => InstantiatePrefab(prefab, target, Vector3.zero, rotation);
+    public static void InstantiatePrefab(PrefabReference prefab, Transform target, Quaternion rotation) => InstantiatePrefab(prefab, target, Vector3.zero, rotation);
     
-    public static void InstantiatePrefab(AssetReference prefab, Transform? target, Vector3 position, Quaternion rotation)
+    public static void InstantiatePrefab(PrefabReference prefab, Transform? target, Vector3 position, Quaternion rotation)
     {
         var packet = new InstantiateNetworkedPrefabServerPacket
         {

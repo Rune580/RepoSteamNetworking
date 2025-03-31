@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using BepInEx;
+using UnityEngine;
 
 namespace RepoSteamNetworking.Utils;
 
@@ -27,5 +28,14 @@ internal static class ReflectionUtils
             .FirstOrDefault();
         
         return pluginInfo;
+    }
+
+    public static IEnumerable<FieldInfo> GetAllSerializedFields(this Component component)
+    {
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
+        
+        var componentType = component.GetType();
+        return componentType.GetFields(flags)
+            .Where(type => type.IsDefined(typeof(SerializeField), false) || type.IsPublic);
     }
 }

@@ -3,6 +3,7 @@ using System.Threading;
 using RepoSteamNetworking.API;
 using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.Packets;
+using RepoSteamNetworking.Utils;
 
 namespace RepoSteamNetworking.Networking.NetworkedProperties;
 
@@ -16,14 +17,32 @@ internal class NetworkedPropertyQueue
     {
         set
         {
+            IsEmpty = false;
+            
             if (!_networkedPropertyValues.TryGetValue(networkId, out var subPropertyValues))
                 _networkedPropertyValues[networkId] = subPropertyValues = new Dictionary<PaletteSubId, Dictionary<BehaviourPropertyId, NetworkedPropertyChange>>();
 
             if (!subPropertyValues.TryGetValue(paletteSubId, out var propertyValues))
+            {
                 subPropertyValues[paletteSubId] = propertyValues = new Dictionary<BehaviourPropertyId, NetworkedPropertyChange>();
+                
+                if (value.ChangeKind is VariableChangeKind.Delta)
+                {
+                    propertyValues[behaviourPropId] = value;
+                    return;
+                }
+            }
+
+            if (value.ChangeKind is VariableChangeKind.Delta)
+            {
+                var currentProp = propertyValues[behaviourPropId];
+                var newValue = VariableDeltaHelper.Add(currentProp.Value, value.Value);
+                currentProp.Value = newValue;
+                propertyValues[behaviourPropId] = currentProp;
+                return;
+            }
             
             propertyValues[behaviourPropId] = value;
-            IsEmpty = false;
         }
     }
 

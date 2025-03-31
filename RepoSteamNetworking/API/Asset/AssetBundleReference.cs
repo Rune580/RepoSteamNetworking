@@ -12,9 +12,9 @@ public record struct AssetBundleReference
 
     public override string ToString() => $"{modNamespace}:{bundleName}";
 
-    public AssetReference GetAssetReference(string assetPath) => new(this, assetPath);
+    public PrefabReference GetAssetReference(string assetPath) => new(this, assetPath);
 
-    public IEnumerable<AssetReference> GetAllAssets() => NetworkAssetDatabase.GetAllAssets(this);
+    public IEnumerable<PrefabReference> GetAllAssets() => NetworkAssetDatabase.GetAllAssets(this);
 
     public static implicit operator AssetBundleReference((string, string) reference)
     {
