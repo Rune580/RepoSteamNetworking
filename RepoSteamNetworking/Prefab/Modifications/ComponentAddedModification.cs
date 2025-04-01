@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RepoSteamNetworking.Utils;
+using UnityEngine;
 
 namespace RepoSteamNetworking.Prefab.Modifications;
 
@@ -11,4 +13,25 @@ public class ComponentAddedModification : BasePrefabModification
     public Dictionary<string, object?> Values;
     
     public string FullTypeName => ComponentPath.Split(':').Last().Split('-').First();
+    public string PrefabPath => ComponentPath.Split(':').First();
+
+    public ComponentAddedModification()
+    {
+        ComponentPath = string.Empty;
+        Values = new Dictionary<string, object?>();
+    }
+
+    public ComponentAddedModification(string componentPath, Dictionary<string, object?> values)
+    {
+        ComponentPath = componentPath;
+        Values = values;
+    }
+
+    internal override void Apply(GameObject prefabRoot)
+    {
+        var child = PrefabPath == prefabRoot.name ? prefabRoot.transform : prefabRoot.transform.Find(PrefabPath);
+        
+        var component = child.GetOrAddComponent(FullTypeName);
+        component.SetFieldValues(Values);
+    }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,6 +10,9 @@ internal class PrefabGameObjectState
     public readonly string PrefabPath;
     public readonly PrefabComponentState[] Components;
     public readonly PrefabGameObjectState[] Children;
+    
+    public string Name => PrefabPath.Split('/', StringSplitOptions.RemoveEmptyEntries).Last();
+    public string ParentPrefabPath => PrefabPath == Name ? string.Empty : PrefabPath.Replace($"/{Name}", "");
 
     private PrefabState _prefab;
     
@@ -19,6 +23,8 @@ internal class PrefabGameObjectState
     {
         _prefab = prefab;
         PrefabPath = string.IsNullOrEmpty(currentPath) ? gameObject.name : $"{currentPath}/{gameObject.name}";
+        
+        _prefab.AddChildPath(PrefabPath);
 
         var components = gameObject.GetComponents<Component>();
         Components = new PrefabComponentState[components.Length];
@@ -37,7 +43,7 @@ internal class PrefabGameObjectState
             prefabComponent.ComponentIndex = componentIndex++;
             componentIndices[prefabComponent.FullTypeName] = componentIndex;
 
-            var componentPath = $"{PrefabPath}:{prefabComponent.FullTypeName}-{componentIndex}";
+            var componentPath = $"{PrefabPath}:{prefabComponent.FullTypeName}-{prefabComponent.ComponentIndex}";
             _prefab.AddComponentPath(componentPath);
             _pathComponentMap[componentPath] = i;
             

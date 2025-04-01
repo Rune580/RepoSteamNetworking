@@ -25,6 +25,8 @@ public class SteamUserConnection : IEquatable<SteamUserConnection>
 
     public ConnectionState State => _info.State;
 
+    public bool IsLobbyHost => RepoSteamNetwork.GetCurrentLobby().IsOwnedBy(SteamId);
+
     public string UserName
     {
         get

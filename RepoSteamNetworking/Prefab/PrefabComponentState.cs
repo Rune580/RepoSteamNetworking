@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using RepoSteamNetworking.Utils;
 using UnityEngine;
@@ -14,7 +15,7 @@ internal class PrefabComponentState
 
     public PrefabComponentState(Component component)
     {
-        FullTypeName = component.GetType().FullName!;
+        FullTypeName = component.GetType().AssemblyQualifiedName!;
 
         var fields = new List<FieldInfo>();
 
@@ -28,5 +29,38 @@ internal class PrefabComponentState
         }
 
         SerializableFields = fields.ToArray();
+    }
+
+    public bool AreFieldsEqual(PrefabComponentState other) => GetChangedValues(other).Count == 0;
+
+    public Dictionary<string, object?> GetChangedValues(PrefabComponentState other)
+    {
+        var diff = new Dictionary<string, object?>();
+        
+        var otherValueFields = other.Values.Keys.ToHashSet();
+        foreach (var (fieldName, value) in Values)
+        {
+            if (!other.Values.TryGetValue(fieldName, out var otherValue))
+            {
+                diff[fieldName] = null;
+                continue;
+            }
+
+            if (value != otherValue)
+            {
+                diff[fieldName] = otherValue;
+                continue;
+            }
+
+            if (otherValueFields.Remove(fieldName))
+                continue;
+            
+            diff[fieldName] = null;
+        }
+
+        foreach (var otherFieldName in otherValueFields)
+            diff[otherFieldName] = other.Values[otherFieldName];
+        
+        return diff;
     }
 }

@@ -48,7 +48,7 @@ internal class NetworkedPropertyQueue
 
     public void SendData()
     {
-        if (!IsEmpty)
+        if (IsEmpty)
             return;
 
         var networkPropValues = new Dictionary<uint, Dictionary<PaletteSubId, Dictionary<BehaviourPropertyId, NetworkedPropertyChange>>>();

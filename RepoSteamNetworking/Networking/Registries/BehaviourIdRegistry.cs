@@ -9,7 +9,7 @@ namespace RepoSteamNetworking.Networking.Registries;
 
 internal static class BehaviourIdRegistry
 {
-    public static readonly BehaviourIdPalette Palette = new();
+    public static BehaviourIdPalette Palette { get; private set; } = new();
     private static bool _initialized;
     
     public static void Init()
@@ -31,7 +31,7 @@ internal static class BehaviourIdRegistry
             }
         }
         
-        Palette.SetBehaviourNames(classNames);
+        Palette = new BehaviourIdPalette(classNames);
         
         _initialized = true;
     }

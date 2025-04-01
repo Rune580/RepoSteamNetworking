@@ -1,6 +1,7 @@
 using System;
-using System.Collections.Generic;
 using RepoSteamNetworking.Networking;
+using RepoSteamNetworking.Prefab;
+using RepoSteamNetworking.Prefab.Modifications;
 using RepoSteamNetworking.Utils;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -16,12 +17,16 @@ public struct PrefabReference
 
     [NonSerialized]
     private Action<GameObject>? _modifyPrefabAction;
+    public BasePrefabModification[] Modifications = [];
+    
+    public bool HasModifications => _modifyPrefabAction is not null || Modifications.Length > 0;
 
     public PrefabReference(PrefabReference other)
     {
         modNamespace = other.modNamespace;
         bundleName = other.bundleName;
         assetPath = other.assetPath;
+        Modifications = other.Modifications;
     }
 
     public PrefabReference(AssetBundleReference bundleRef, string assetPath)
@@ -54,22 +59,29 @@ public struct PrefabReference
         return newPrefabRef;
     }
 
-    internal void ApplyModifications(GameObject prefab)
+    internal void CreateModifications(GameObject prefab)
     {
         if (_modifyPrefabAction is null)
             return;
 
-        var components = prefab.GetComponentsInChildren<MonoBehaviour>();
-
-        var componentFieldValues = new Dictionary<string, Dictionary<string, object?>>();
-
-        foreach (var component in components)
-        {
-            component.GetAllSerializedFields();
-        }
-            
-        
+        var originalState = new PrefabState(prefab);
         _modifyPrefabAction.Invoke(prefab);
+        var modifiedState = new PrefabState(prefab);
+        
+        Modifications = originalState.GetModifications(modifiedState).AsArray();
+
+#if DEBUG
+        Logging.Info($"Found {Modifications.Length} number of Modifications on {prefab.name}!");
+#endif
+    }
+
+    internal void ApplyModifications(GameObject prefab)
+    {
+        if (Modifications.Length == 0)
+            return;
+        
+        var modifications = new PrefabModifications(Modifications);
+        modifications.ApplyModifications(prefab);
     }
 
     public override string ToString() => $"{modNamespace}:{bundleName}:{assetPath}";

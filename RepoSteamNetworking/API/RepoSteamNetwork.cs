@@ -15,6 +15,7 @@ using RepoSteamNetworking.Utils;
 using Steamworks;
 using Steamworks.Data;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace RepoSteamNetworking.API;
 
@@ -44,7 +45,7 @@ public static class RepoSteamNetwork
 
         if (identity.IsSteamId && header.Sender != sender)
         {
-            Logging.Warn($"{SteamIdUtils.GetLobbyName(sender)} sent the incorrect SteamID {header.Sender} for their connection! Dropping connection...");
+            Logging.Warn($"{sender.GetLobbyName()} sent the incorrect SteamID {header.Sender} for their connection! Dropping connection...");
             if (RepoNetworkingServer.Instance.SocketManager!.TryGetSteamUserConnection(sender, out var userConnection))
             {
                 userConnection.Close();
@@ -234,11 +235,29 @@ public static class RepoSteamNetwork
     
     public static void InstantiatePrefab(PrefabReference prefab, Transform target, Quaternion rotation) => InstantiatePrefab(prefab, target, Vector3.zero, rotation);
     
-    public static void InstantiatePrefab(PrefabReference prefab, Transform? target, Vector3 position, Quaternion rotation)
+    public static void InstantiatePrefab(PrefabReference prefabRef, Transform? target, Vector3 position, Quaternion rotation)
     {
+        if (prefabRef.HasModifications)
+        {
+            var prefab = NetworkAssetDatabase.LoadAsset<GameObject>(prefabRef);
+            if (prefab is null)
+            {
+                Logging.Error($"Failed to instantiate network prefab {prefabRef.ToString()}! Verify the asset path and make sure you registered the AssetBundle!");
+                return;
+            }
+            var wasPrefabActive = prefab.activeSelf;
+            prefab.SetActive(false);
+            
+            var modifiedPrefab = Object.Instantiate(prefab);
+            prefab.SetActive(wasPrefabActive);
+            
+            prefabRef.CreateModifications(modifiedPrefab);
+            Object.DestroyImmediate(modifiedPrefab);
+        }
+        
         var packet = new InstantiateNetworkedPrefabServerPacket
         {
-            Prefab = prefab,
+            Prefab = prefabRef,
             Position = position,
             Rotation = rotation
         };

@@ -60,6 +60,7 @@ public class RepoNetworkingServer : MonoBehaviour
         _serverActive = true;
         
         RepoSteamNetworkManager.Instance.SetModGuidPalette(ModNetworkGuidRegistry.Palette);
+        RepoSteamNetworkManager.Instance.SetBehaviourIdPalette(BehaviourIdRegistry.Palette);
     }
 
     public string CreateAuthKey()

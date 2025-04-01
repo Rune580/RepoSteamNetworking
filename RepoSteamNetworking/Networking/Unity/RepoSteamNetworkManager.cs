@@ -80,9 +80,29 @@ public class RepoSteamNetworkManager : MonoBehaviour
         _networkObjects.Remove(networkIdentity.NetworkId);
     }
     
-    internal void SetModGuidPalette(ModNetworkGuidPalette palette) => _guidPalette = palette;
-    
-    internal void SetBehaviourIdPalette(BehaviourIdPalette palette) => _behaviourIdPalette = palette;
+    internal void SetModGuidPalette(ModNetworkGuidPalette palette)
+    {
+        _guidPalette = palette;
+
+#if DEBUG
+        foreach (var (paletteId, modGuid) in _guidPalette)
+        {
+            Logging.Info($"[ModNetworkGuidPalette] {modGuid} is registered as {paletteId}");
+        }
+#endif
+    }
+
+    internal void SetBehaviourIdPalette(BehaviourIdPalette palette)
+    {
+        _behaviourIdPalette = palette;
+        
+#if DEBUG
+        foreach (var (paletteId, behaviour) in _behaviourIdPalette)
+        {
+            Logging.Info($"[BehaviourIdPalette] {behaviour} is registered as {paletteId}");
+        }
+#endif
+    }
 
     internal string GetModGuid(uint paletteId) => _guidPalette.GetModGuid(paletteId);
     
@@ -106,6 +126,9 @@ public class RepoSteamNetworkManager : MonoBehaviour
         prefab.SetActive(false);
         
         var instance = Instantiate(prefab, position, rotation);
+        if (prefabRef.HasModifications)
+            prefabRef.ApplyModifications(instance);
+        
         var networkIdentity = instance.AddComponent<RepoSteamNetworkIdentity>();
         
         networkIdentity.SetNetworkId(networkId);
@@ -138,6 +161,9 @@ public class RepoSteamNetworkManager : MonoBehaviour
         }
 
         var instance = Instantiate(prefab, position, rotation, target);
+        if (prefabRef.HasModifications)
+            prefabRef.ApplyModifications(instance);
+        
         var networkIdentity = instance.AddComponent<RepoSteamNetworkIdentity>();
         
         networkIdentity.SetNetworkId(networkId);

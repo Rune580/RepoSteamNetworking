@@ -211,10 +211,21 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                 code.AppendLine($"{modifiers} {prop.TypeName} {prop.PropertyName}\n{{")
                     .AppendLine($"get => {prop.BackingFieldName};")
                     .AppendLine("set\n{")
-                    .AppendLine($"if ({prop.BackingFieldName} == value)\n{{\nreturn;\n}}")
-                    .AppendLine($"{prop.BackingFieldName} = value;")
-                    .AppendLine($"SendNetworkedPropertyData({prop.BackingFieldName}, {i}, {prop.ChangeKind});")
-                    .AppendLine("}\n}");
+                    .AppendLine($"if ({prop.BackingFieldName} == value)\n{{\nreturn;\n}}");
+
+                switch (prop.ChangeKind)
+                {
+                    case 0:
+                        code.AppendLine($"{prop.BackingFieldName} = value;")
+                            .AppendLine($"SendNetworkedPropertyData({prop.BackingFieldName}, {i}, {prop.ChangeKind});");
+                        break;
+                    case 1:
+                        code.AppendLine($"SendNetworkedPropertyData(value - {prop.BackingFieldName}, {i}, {prop.ChangeKind});")
+                            .AppendLine($"{prop.BackingFieldName} = value;");
+                        break;
+                }
+                
+                code.AppendLine("}\n}");
             }
 
             code.AppendLine("private void SendNetworkedPropertyData(object value, uint propId, byte changeKind)\n{")

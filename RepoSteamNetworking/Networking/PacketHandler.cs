@@ -85,8 +85,12 @@ internal static class PacketHandler
             return;
         
         userConnection.SetValidated();
+
+        // if (userConnection.IsLobbyHost)
+        //     return;
         
-        // Send ModNetworkGuidPalette to client
+        Logging.Info($"Sending Connection Palettes [ModNetworkGuidRegistry: {ModNetworkGuidRegistry.Palette.Count()} Entries] [BehaviourIdRegistry: {BehaviourIdRegistry.Palette.Count()} Entries] to {userConnection.UserName}");
+        // Send palettes to client
         var palettePacket = new SetConnectionPalettesPacket
         {
             GuidPalette = ModNetworkGuidRegistry.Palette,

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using BepInEx.Logging;
 
@@ -65,7 +66,7 @@ internal static class Logging
         }
     }
 
-    public static string DebugFormat(this object obj, bool showTypeName = false, bool newLine = false)
+    public static string DebugFormat(this object obj, bool showTypeName = false, bool newLine = false, int depth = 0)
     {
         var type = obj.GetType();
 
@@ -84,8 +85,22 @@ internal static class Logging
             var name = propertyInfo.Name;
             var value = propertyInfo.GetValue(obj);
             
-            builder.Append($"{name}: {value},");
-
+            if (depth > 0)
+            {
+                try
+                {
+                    builder.Append(value.DebugFormat(showTypeName, newLine, depth - 1));
+                }
+                catch
+                {
+                    builder.Append($"{name}: {value},");
+                }
+            }
+            else
+            {
+                builder.Append($"{name}: {value},");
+            }
+            
             if (!newLine)
                 builder.Append(" ");
         }
@@ -98,7 +113,21 @@ internal static class Logging
             var name = fieldInfo.Name;
             var value = fieldInfo.GetValue(obj);
             
-            builder.Append($"{name}: {value},");
+            if (depth > 0)
+            {
+                try
+                {
+                    builder.Append(value.DebugFormat(showTypeName, newLine, depth - 1));
+                }
+                catch
+                {
+                    builder.Append($"{name}: {value},");
+                }
+            }
+            else
+            {
+                builder.Append($"{name}: {value},");
+            }
 
             if (!newLine)
                 builder.Append(" ");
@@ -112,7 +141,7 @@ internal static class Logging
         return builder.ToString();
     }
 
-    public static string DebugFormatArray<T>(this T[] array)
+    public static string DebugFormatArray<T>(this IEnumerable<T> array)
     {
         var builder = new StringBuilder();
 

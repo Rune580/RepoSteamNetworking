@@ -1,26 +1,40 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace RepoSteamNetworking.Networking.Data;
 
 [Serializable]
-internal class BehaviourIdPalette
+internal class BehaviourIdPalette : IEnumerable<KeyValuePair<uint, string>>
 {
-    private Dictionary<uint, string> _behaviourIdToClassName = new();
-    private Dictionary<string, uint> _classNameToBehaviourId = new();
-
-    public void SetBehaviourNames(IEnumerable<string> behaviourClassNames)
+    public Dictionary<uint, string> BehaviourIdToClassName;
+    public Dictionary<string, uint> ClassNameToBehaviourId;
+    
+    public BehaviourIdPalette()
     {
+        BehaviourIdToClassName = new Dictionary<uint, string>();
+        ClassNameToBehaviourId = new Dictionary<string, uint>();
+    }
+
+    public BehaviourIdPalette(IEnumerable<string> behaviourClassNames)
+    {
+        BehaviourIdToClassName = new Dictionary<uint, string>();
+        ClassNameToBehaviourId = new Dictionary<string, uint>();
+        
         uint i = 0;
         foreach (var behaviourClassName in behaviourClassNames)
         {
-            _behaviourIdToClassName[i] = behaviourClassName;
-            _classNameToBehaviourId[behaviourClassName] = i;
+            BehaviourIdToClassName[i] = behaviourClassName;
+            ClassNameToBehaviourId[behaviourClassName] = i;
             i++;
         }
     }
 
-    public string GetClassName(uint behaviourId) => _behaviourIdToClassName[behaviourId];
+    public string GetClassName(uint behaviourId) => BehaviourIdToClassName[behaviourId];
     
-    public uint GetBehaviourId(string className) => _classNameToBehaviourId[className];
+    public uint GetBehaviourId(string className) => ClassNameToBehaviourId[className];
+    
+    public IEnumerator<KeyValuePair<uint, string>> GetEnumerator() => BehaviourIdToClassName.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

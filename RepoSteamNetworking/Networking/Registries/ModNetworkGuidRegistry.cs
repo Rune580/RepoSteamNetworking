@@ -6,7 +6,7 @@ namespace RepoSteamNetworking.Networking.Registries;
 
 internal static class ModNetworkGuidRegistry
 {
-    public static readonly ModNetworkGuidPalette Palette = new();
+    public static ModNetworkGuidPalette Palette { get; private set; } = new();
     private static bool _initialized;
 
     public static void Init()
@@ -15,7 +15,7 @@ internal static class ModNetworkGuidRegistry
             return;
 
         var modGuids = Chainloader.PluginInfos.Keys.ToArray();
-        Palette.SetGuids(modGuids);
+        Palette = new ModNetworkGuidPalette(modGuids);
         
         _initialized = true;
     }
