@@ -79,6 +79,12 @@ public static class RepoSteamNetwork
             }
         }
 
+        if (header.Destination == NetworkDestination.EveryoneExcludingSender)
+        {
+            RepoNetworkingServer.Instance.SendSocketMessageToClients(new SocketMessage(data), packet.Header.Sender);
+            return;
+        }
+
         RepoNetworkingServer.Instance.SendSocketMessageToClients(new SocketMessage(data));
     }
     
@@ -179,6 +185,10 @@ public static class RepoSteamNetwork
             if (destination == NetworkDestination.PacketTarget && packet.Header.Target.IsValid)
             {
                 RepoNetworkingServer.Instance.SendSocketMessageToTarget(message, packet.Header.Target);
+            }
+            else if (destination == NetworkDestination.EveryoneExcludingSender && packet.Header.Sender.IsValid)
+            {
+                RepoNetworkingServer.Instance.SendSocketMessageToClients(message, packet.Header.Sender);
             }
             else
             {

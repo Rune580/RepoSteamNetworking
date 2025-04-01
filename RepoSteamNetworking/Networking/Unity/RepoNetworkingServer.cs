@@ -83,7 +83,7 @@ public class RepoNetworkingServer : MonoBehaviour
         _serverActive = false;
     }
 
-    public void SendSocketMessageToClients(SocketMessage message)
+    public void SendSocketMessageToClients(SocketMessage message, SteamId excludeSteamId = default)
     {
         if (SocketManager is null)
         {
@@ -96,6 +96,10 @@ public class RepoNetworkingServer : MonoBehaviour
         {
             if (connection.State is not ConnectionState.Connected)
                 continue;
+
+            if (excludeSteamId.IsValid && connection.SteamId == excludeSteamId)
+                continue;
+            
             var result = connection.SendMessage(message.GetBytes());
         }
     }

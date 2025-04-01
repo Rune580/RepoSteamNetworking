@@ -19,4 +19,8 @@ public enum NetworkDestination
     /// If no target specified or the target is invalid, this packet will be dropped.
     /// </summary>
     PacketTarget = 3,
+    /// <summary>
+    /// Same as <see cref="Everyone"/> but the Sender doesn't receive the packet.
+    /// </summary>
+    EveryoneExcludingSender = 4,
 }

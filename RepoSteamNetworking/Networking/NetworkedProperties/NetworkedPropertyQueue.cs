@@ -106,6 +106,6 @@ internal class NetworkedPropertyQueue
             }
         }
         
-        RepoSteamNetwork.SendPackets(packets);
+        RepoSteamNetwork.SendPackets(packets, NetworkDestination.EveryoneExcludingSender);
     }
 }
