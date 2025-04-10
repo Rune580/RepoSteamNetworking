@@ -104,7 +104,7 @@ public static class RepoSteamNetwork
         NetworkPacketRegistry.InvokeCallbacks(packet);
     }
 
-    internal static Lobby GetCurrentLobby()
+    public static Lobby GetCurrentLobby()
     {
         if (RepoNetworkingServer.Instance.ServerActive)
             return RepoNetworkingServer.Instance.CurrentLobby;
