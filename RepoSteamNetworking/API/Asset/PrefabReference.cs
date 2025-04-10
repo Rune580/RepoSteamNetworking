@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.Contracts;
 using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Prefab;
 using RepoSteamNetworking.Prefab.Modifications;
@@ -50,6 +51,7 @@ public struct PrefabReference
         return NetworkAssetDatabase.LoadAssetAsync<T>(this);
     }
 
+    [Pure]
     public PrefabReference WithModifications(Action<GameObject> modifyPrefabAction)
     {
         var newPrefabRef = new PrefabReference(this)
