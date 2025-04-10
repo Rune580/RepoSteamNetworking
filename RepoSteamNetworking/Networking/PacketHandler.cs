@@ -86,8 +86,8 @@ internal static class PacketHandler
         
         userConnection.SetValidated();
 
-        // if (userConnection.IsLobbyHost)
-        //     return;
+        if (userConnection.IsLobbyHost)
+            return;
         
         Logging.Info($"Sending Connection Palettes [ModNetworkGuidRegistry: {ModNetworkGuidRegistry.Palette.Count()} Entries] [BehaviourIdRegistry: {BehaviourIdRegistry.Palette.Count()} Entries] to {userConnection.UserName}");
         // Send palettes to client
