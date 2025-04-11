@@ -43,13 +43,9 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                 }
                 
                 var attr = syntaxContext.Attributes[0];
-                var propertyName = attr.NamedArguments.Where(kvp => kvp.Key == "OverridePropertyName")
-                    .Select(kvp => kvp.Value.Value as string)
-                    .FirstOrDefault();
+                var propertyName = attr.GetNamedArgument<string>("OverridePropertyName");
 
-                var changeKind = attr.NamedArguments.Where(kvp => kvp.Key == "SendMethod")
-                    .Select(kvp => (byte)kvp.Value.Value!)
-                    .FirstOrDefault();
+                var changeKind = attr.GetNamedArgument<byte>("SendMethod");
                 
                 var fieldSymbol = (IFieldSymbol)syntaxContext.TargetSymbol;
 
@@ -112,9 +108,9 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                 }
                 
                 var attr = syntaxContext.Attributes[0];
-                var changeKind = attr.NamedArguments.Where(kvp => kvp.Key == "SendMethod")
-                    .Select(kvp => (byte)kvp.Value.Value!)
-                    .FirstOrDefault();
+                var changeKind = attr.GetNamedArgument<byte>("SendMethod");
+                
+                var overrideBackingField = attr.GetNamedArgument<string>("OverrideBackingField");
                 
                 var propertySymbol = (IPropertySymbol)syntaxContext.TargetSymbol;
                 var propertySyntax = (BasePropertyDeclarationSyntax)syntaxContext.TargetNode;
@@ -127,7 +123,14 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                 var propertyName = syntaxContext.TargetSymbol.Name.Trim();
 
                 var backingField = $"{propertyName}_BackingField".ToLowerCamelCaseWithUnderscore();
+                var needsField = true;
                 
+                if (!string.IsNullOrWhiteSpace(overrideBackingField))
+                {
+                    backingField = overrideBackingField;
+                    needsField = false;
+                }
+
                 return new NetworkedPropertyContext
                 {
                     PropertyName = propertyName,
@@ -136,7 +139,7 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                     TypeName = type,
                     Namespace = containingNamespace,
                     ClassName = containingClass.Name,
-                    NeedsField = true,
+                    NeedsField = needsField,
                     BaseTypeTree = baseTypeTree,
                     ChangeKind = changeKind,
                 };

@@ -3,7 +3,7 @@ using System;
 namespace RepoSteamNetworking.Networking.Data;
 
 [Serializable]
-internal struct NetworkTransform
+internal struct SerializableNetworkTransform
 {
     public uint networkId;
     public string path;

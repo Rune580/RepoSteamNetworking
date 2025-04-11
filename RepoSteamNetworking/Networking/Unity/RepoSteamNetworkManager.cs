@@ -57,6 +57,7 @@ public class RepoSteamNetworkManager : MonoBehaviour
 
             prefabRef = prefabRef.WithModifications(prefab =>
             {
+                prefab.AddComponent<NetworkTransform>();
                 prefab.AddComponent<ExampleBehaviour>();
             });
 
@@ -136,7 +137,7 @@ public class RepoSteamNetworkManager : MonoBehaviour
         prefab.SetActive(wasPrefabActive);
     }
 
-    internal void InstantiateNetworkPrefab(uint networkId, PrefabReference prefabRef, NetworkTransform targetTransform, Vector3 position, Quaternion rotation)
+    internal void InstantiateNetworkPrefab(uint networkId, PrefabReference prefabRef, SerializableNetworkTransform targetTransform, Vector3 position, Quaternion rotation)
     {
         var prefab = NetworkAssetDatabase.LoadAsset<GameObject>(prefabRef);
         if (prefab is null)

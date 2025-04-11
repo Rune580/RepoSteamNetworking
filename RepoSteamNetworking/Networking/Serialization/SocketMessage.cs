@@ -39,7 +39,7 @@ public class SocketMessage : IDisposable
         _buffer = new MemoryStream(buffer);
     }
 
-    internal byte[] GetBytes() => _buffer.GetBuffer();
+    internal byte[] GetBytes() => _buffer.ToArray();
 
     public SocketMessage Write<T>(T value)
     {

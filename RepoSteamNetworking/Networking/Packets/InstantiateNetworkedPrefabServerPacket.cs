@@ -12,7 +12,7 @@ internal class InstantiateNetworkedPrefabServerPacket : NetworkPacket<Instantiat
 {
     public PrefabReference Prefab { get; set; }
     public bool HasTarget { get; private set; }
-    public NetworkTransform TargetTransform { get; private set; }
+    public SerializableNetworkTransform TargetTransform { get; private set; }
     public Vector3 Position { get; set; }
     public Quaternion Rotation { get; set; }
 
@@ -30,7 +30,7 @@ internal class InstantiateNetworkedPrefabServerPacket : NetworkPacket<Instantiat
         var path = target.GetPathFromParent(networkIdentity.transform);
 
         HasTarget = true;
-        TargetTransform = new NetworkTransform
+        TargetTransform = new SerializableNetworkTransform
         {
             networkId = networkIdentity.NetworkId,
             path = path
@@ -52,7 +52,7 @@ internal class InstantiateNetworkedPrefabServerPacket : NetworkPacket<Instantiat
         Prefab = socketMessage.Read<PrefabReference>();
         HasTarget = socketMessage.Read<bool>();
         if (HasTarget)
-            TargetTransform = socketMessage.Read<NetworkTransform>();
+            TargetTransform = socketMessage.Read<SerializableNetworkTransform>();
         Position = socketMessage.Read<Vector3>();
         Rotation = socketMessage.Read<Quaternion>();
     }

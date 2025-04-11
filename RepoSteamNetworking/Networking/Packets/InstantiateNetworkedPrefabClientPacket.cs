@@ -11,7 +11,7 @@ internal class InstantiateNetworkedPrefabClientPacket : NetworkPacket<Instantiat
     public uint NetworkId { get; set; }
     public PrefabReference Prefab { get; set; }
     public bool HasTarget { get; private set; }
-    public NetworkTransform TargetTransform { get; private set; }
+    public SerializableNetworkTransform TargetTransform { get; private set; }
     public Vector3 Position { get; set; }
     public Quaternion Rotation { get; set; }
 
@@ -41,7 +41,7 @@ internal class InstantiateNetworkedPrefabClientPacket : NetworkPacket<Instantiat
         Prefab = socketMessage.Read<PrefabReference>();
         HasTarget = socketMessage.Read<bool>();
         if (HasTarget)
-            TargetTransform = socketMessage.Read<NetworkTransform>();
+            TargetTransform = socketMessage.Read<SerializableNetworkTransform>();
         Position = socketMessage.Read<Vector3>();
         Rotation = socketMessage.Read<Quaternion>();
     }

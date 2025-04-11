@@ -80,10 +80,7 @@ public class SteamNetworkSubIdentityImplementerGenerator : IIncrementalGenerator
 
         var bepInPluginAttributePipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
             fullyQualifiedMetadataName: "BepInEx.BepInPlugin",
-            predicate: static (node, token) =>
-            {
-                return node is ClassDeclarationSyntax;
-            },
+            predicate: static (node, token) => node is ClassDeclarationSyntax,
             transform: static (syntaxContext, token) =>
             {
                 var containingClass = syntaxContext.TargetSymbol;
@@ -164,14 +161,11 @@ public class SteamNetworkSubIdentityImplementerGenerator : IIncrementalGenerator
             fullyQualifiedMetadataName: NetworkedPropertyGenerator.AttributeClassName,
             predicate: static (node, token) =>
             {
-                if (node is not VariableDeclaratorSyntax and BasePropertyDeclarationSyntax)
-                    return false;
-
-                return true;
+                return node is VariableDeclaratorSyntax or BasePropertyDeclarationSyntax;
             },
             transform: TransformImplementer
         );
-
+        
         var implementers = rpcAttributePipeline.Collect()
             .Combine(networkedPropertyAttributePipeline.Collect())
             .Select(static (pair, token) =>

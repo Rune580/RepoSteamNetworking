@@ -117,4 +117,33 @@ public class SubIdentityImplementationTests
 
         await runner.RunAsync();
     }
+    
+    [Test]
+    public async Task FromNetworkedPropertyWithPluginInfo()
+    {
+        var code = """
+                   using RepoSteamNetworking.API.Unity;
+
+                   namespace ExampleNamespace
+                   {
+                        public partial class ExampleBehaviour
+                        {
+                            [NetworkedProperty]
+                            public partial int TestNumber { get; set; }
+                        }
+                   }
+                   """;
+
+        var requiredCode = GetRequiredCode();
+
+        var runner = new CSharpSourceGeneratorVerifier<SteamNetworkSubIdentityImplementerGenerator>.TestRunner
+        {
+            TestState =
+            {
+                Sources = {("ExampleBehaviour.cs", code), requiredCode[0], requiredCode[1], requiredCode[2], ("obj/Debug/netstandard2.1/PluginInfo.cs", requiredCode[3]) },
+            }
+        };
+
+        await runner.RunAsync();
+    }
 }
