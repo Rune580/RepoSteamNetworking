@@ -7,6 +7,15 @@ namespace RepoSteamNetworking.Networking.Unity;
 [DisallowMultipleComponent]
 public partial class NetworkTransform : MonoBehaviour
 {
+    [NetworkedProperty(OverrideBackingField = "transform.position")]
+    public partial Vector3 SyncedPosition { get; set; }
+    
+    [NetworkedProperty(OverrideBackingField = "transform.eulerAngles")]
+    public partial Vector3 SyncedRotation { get; set; }
+    
+    [NetworkedProperty(OverrideBackingField = "transform.localScale")]
+    public partial Vector3 SyncedScale { get; set; }
+    
     public bool syncPositionX = true;
     public bool syncPositionY = true;
     public bool syncPositionZ = true;
@@ -47,7 +56,7 @@ public partial class NetworkTransform : MonoBehaviour
     {
         _timer += Time.deltaTime;
 
-        while (_timer >= TimePerTick)
+        if (_timer >= TimePerTick)
         {
             TrySyncProperties();
             _timer -= TimePerTick;
@@ -60,67 +69,52 @@ public partial class NetworkTransform : MonoBehaviour
         if (VectorsChanged(position, _lastValidPosition, PositionMask, positionThreshold))
         {
             _lastValidPosition = position;
-            SyncPosition(position, syncPositionX, syncPositionY, syncPositionZ);
+
+            var posToSet = SyncedPosition;
+            
+            if (syncPositionX)
+                posToSet.x = position.x;
+            if (syncPositionY)
+                posToSet.y = position.y;
+            if (syncPositionZ)
+                posToSet.z = position.z;
+            
+            SyncedPosition = posToSet;
         }
         
         var rotation = transform.eulerAngles;
         if (VectorsChanged(rotation, _lastValidRotation, RotationMask, rotationThreshold))
         {
             _lastValidRotation = rotation;
-            SyncRotation(rotation, syncRotationX, syncRotationY, syncRotationZ);
+            
+            var rotToSet = SyncedRotation;
+            
+            if (syncRotationX)
+                rotToSet.x = position.x;
+            if (syncRotationY)
+                rotToSet.y = position.y;
+            if (syncRotationZ)
+                rotToSet.z = position.z;
+            
+            SyncedRotation = rotToSet;
         }
         
         var scale = transform.localScale;
         if (VectorsChanged(scale, _lastValidScale, ScaleMask, scaleThreshold))
         {
             _lastValidScale = scale;
-            SyncScale(scale, syncScaleX, syncScaleY, syncScaleZ);
+            
+            var scaleToSet = SyncedScale;
+        
+            if (syncScaleX)
+                scaleToSet.x = scale.x;
+            if (syncScaleY)
+                scaleToSet.y = scale.y;
+            if (syncScaleZ)
+                scaleToSet.z = scale.z;
+            
+            SyncedScale = scaleToSet;
         }
-    }
-
-    [RepoSteamRPC(RPCTarget.Clients)]
-    public void SyncPositionRPC(Vector3 position, bool syncX, bool syncY, bool syncZ)
-    {
-        var posToSet = transform.position;
-        
-        if (syncX)
-            posToSet.x = position.x;
-        if (syncY)
-            posToSet.y = position.y;
-        if (syncZ)
-            posToSet.z = position.z;
-        
-        transform.position = posToSet;
-    }
-
-    [RepoSteamRPC(RPCTarget.Clients)]
-    public void SyncRotationRPC(Vector3 rotation, bool syncX, bool syncY, bool syncZ)
-    {
-        var rotToSet = transform.eulerAngles;
-
-        if (syncX)
-            rotToSet.x = rotation.x;
-        if (syncY)
-            rotToSet.y = rotation.y;
-        if (syncZ)
-            rotToSet.z = rotation.z;
-        
-        transform.eulerAngles = rotToSet;
-    }
-
-    [RepoSteamRPC(RPCTarget.Clients)]
-    public void SyncScaleRPC(Vector3 scale, bool syncX, bool syncY, bool syncZ)
-    {
-        var scaleToSet = transform.localScale;
-        
-        if (syncX)
-            scaleToSet.x = scale.x;
-        if (syncY)
-            scaleToSet.y = scale.y;
-        if (syncZ)
-            scaleToSet.z = scale.z;
-        
-        transform.localScale = scaleToSet;
     }
 
     private static Vector3 MaskVector(Vector3 vector, Vector3 mask) =>

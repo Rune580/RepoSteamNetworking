@@ -58,6 +58,7 @@ public class RepoSteamNetworkManager : MonoBehaviour
             prefabRef = prefabRef.WithModifications(prefab =>
             {
                 prefab.AddComponent<NetworkTransform>();
+                prefab.AddComponent<NetworkRigidbody>();
                 prefab.AddComponent<ExampleBehaviour>();
             });
 

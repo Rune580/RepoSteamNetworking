@@ -21,6 +21,8 @@ namespace RepoSteamNetworking.API;
 
 public static class RepoSteamNetwork
 {
+    private static readonly RPCMethodHelper RPCHelper = new();
+
     public static SteamId CurrentSteamId
     {
         get
@@ -31,8 +33,11 @@ public static class RepoSteamNetwork
             return field;
         }
     }
-
-    private static readonly RPCMethodHelper RPCHelper = new();
+    
+    /// <summary>
+    /// Use to determine if you're the host.
+    /// </summary>
+    public static bool IsServer => RepoNetworkingServer.Instance.ServerActive;
 
     internal static void OnHostReceivedMessage(byte[] data, Connection connection, NetIdentity identity)
     {

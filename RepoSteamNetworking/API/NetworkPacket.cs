@@ -54,7 +54,7 @@ public abstract class NetworkPacket
         ReadData(message);
 
 #if DEBUG
-        Logging.Info(this.DebugFormat(true, true, depth: 1));
+        Logging.Info(this.DebugFormat(true, true));
 #endif
         
         return this;
