@@ -64,6 +64,22 @@
         <PackageReference Include="UnityEngine.Modules" Version="2022.3.21" />
         <PackageReference Include="R.E.P.O.GameLibs.Steam" Version="0.1.2-ngd.0" Publicize="true" />
     </ItemGroup>
+    
+    <!-- Find Custom Formatters -->
+    <ItemGroup>
+        <CustomFormatterFiles Include="Odin/Formatters/*.cs" Visibile="false" />
+        <CustomFormatters Include="@(CustomFormatterFiles->'RepoSteamNetworking.%(Identity)'->Replace('.cs', '')->Replace('/', '.'))" Visible="false" />
+    </ItemGroup>
+    
+    <!-- Register Custom Formatters -->
+    <Target Name="RegisterCustomFormatters" BeforeTargets="PreBuildEvent">
+        <ItemGroup>
+            <AssemblyAttribute Include="Sirenix.Serialization.RegisterFormatterAttribute">
+                <_Parameter1>%(CustomFormatters.Identity)</_Parameter1>
+                <_Parameter1_TypeName>System.Type</_Parameter1_TypeName>
+            </AssemblyAttribute>
+        </ItemGroup>
+    </Target>
 
     <Target Name="SetPluginVersion" BeforeTargets="AddGeneratedFile" DependsOnTargets="MinVer">
         <PropertyGroup>

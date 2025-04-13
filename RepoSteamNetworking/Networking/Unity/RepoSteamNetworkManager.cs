@@ -15,7 +15,7 @@ namespace RepoSteamNetworking.Networking.Unity;
 public class RepoSteamNetworkManager : MonoBehaviour
 {
     // TODO: Look into making this be something dynamic/configurable.
-    private const float NetworkPropertySyncInterval = 0.25f;
+    private const float NetworkPropertySyncInterval = 1f / 30f;
     
     private static RepoSteamNetworkManager? _instance;
     public static RepoSteamNetworkManager Instance => _instance;

@@ -1,4 +1,6 @@
+using RepoSteamNetworking.API;
 using RepoSteamNetworking.API.Unity;
+using RepoSteamNetworking.Networking.Data;
 using UnityEngine;
 
 namespace RepoSteamNetworking.Networking.Unity;
@@ -7,14 +9,8 @@ namespace RepoSteamNetworking.Networking.Unity;
 [DisallowMultipleComponent]
 public partial class NetworkTransform : MonoBehaviour
 {
-    [NetworkedProperty(OverrideBackingField = "transform.position")]
-    public partial Vector3 SyncedPosition { get; set; }
-    
-    [NetworkedProperty(OverrideBackingField = "transform.eulerAngles")]
-    public partial Vector3 SyncedRotation { get; set; }
-    
-    [NetworkedProperty(OverrideBackingField = "transform.localScale")]
-    public partial Vector3 SyncedScale { get; set; }
+    [NetworkedProperty(CallbackMethodName = nameof(OnReceivedDelta))]
+    public partial NetworkTransformDelta TransformDelta { get; set; }
     
     public bool syncPositionX = true;
     public bool syncPositionY = true;
@@ -54,6 +50,9 @@ public partial class NetworkTransform : MonoBehaviour
 
     private void Update()
     {
+        if (!RepoSteamNetwork.IsServer)
+            return;
+        
         _timer += Time.deltaTime;
 
         if (_timer >= TimePerTick)
@@ -69,17 +68,13 @@ public partial class NetworkTransform : MonoBehaviour
         if (VectorsChanged(position, _lastValidPosition, PositionMask, positionThreshold))
         {
             _lastValidPosition = position;
-
-            var posToSet = SyncedPosition;
             
             if (syncPositionX)
-                posToSet.x = position.x;
+                TransformDelta = TransformDelta with { PositionX = position.x };
             if (syncPositionY)
-                posToSet.y = position.y;
+                TransformDelta = TransformDelta with { PositionY = position.y };
             if (syncPositionZ)
-                posToSet.z = position.z;
-            
-            SyncedPosition = posToSet;
+                TransformDelta = TransformDelta with { PositionZ = position.z };
         }
         
         var rotation = transform.eulerAngles;
@@ -87,16 +82,12 @@ public partial class NetworkTransform : MonoBehaviour
         {
             _lastValidRotation = rotation;
             
-            var rotToSet = SyncedRotation;
-            
             if (syncRotationX)
-                rotToSet.x = position.x;
+                TransformDelta = TransformDelta with { RotationX = rotation.x };
             if (syncRotationY)
-                rotToSet.y = position.y;
+                TransformDelta = TransformDelta with { RotationY = rotation.y };
             if (syncRotationZ)
-                rotToSet.z = position.z;
-            
-            SyncedRotation = rotToSet;
+                TransformDelta = TransformDelta with { RotationZ = rotation.z };
         }
         
         var scale = transform.localScale;
@@ -104,17 +95,48 @@ public partial class NetworkTransform : MonoBehaviour
         {
             _lastValidScale = scale;
             
-            var scaleToSet = SyncedScale;
-        
             if (syncScaleX)
-                scaleToSet.x = scale.x;
+                TransformDelta = TransformDelta with { ScaleX = scale.x };
             if (syncScaleY)
-                scaleToSet.y = scale.y;
+                TransformDelta = TransformDelta with { ScaleY = scale.y };
             if (syncScaleZ)
-                scaleToSet.z = scale.z;
-            
-            SyncedScale = scaleToSet;
+                TransformDelta = TransformDelta with { ScaleZ = scale.z };
         }
+    }
+
+    private void OnReceivedDelta(NetworkTransformDelta delta)
+    {
+        if (RepoSteamNetwork.IsServer)
+            return;
+        
+        Debug.Log($"Received Delta {delta.PositionX}, {delta.PositionY}, {delta.PositionZ}");
+        
+        var position = transform.position;
+        if (delta.PositionX.HasValue)
+            position.x = delta.PositionX.Value;
+        if (delta.PositionY.HasValue)
+            position.y = delta.PositionY.Value;
+        if (delta.PositionZ.HasValue)
+            position.z = delta.PositionZ.Value;
+        transform.position = position;
+        
+        var rotation = transform.eulerAngles;
+        if (delta.RotationX.HasValue)
+            rotation.x = delta.RotationX.Value;
+        if (delta.RotationY.HasValue)
+            rotation.y = delta.RotationY.Value;
+        if (delta.RotationZ.HasValue)
+            rotation.z = delta.RotationZ.Value;
+        transform.eulerAngles = rotation;
+        
+        var scale = transform.localScale;
+        if (delta.ScaleX.HasValue)
+            scale.x = delta.ScaleX.Value;
+        if (delta.ScaleY.HasValue)
+            scale.y = delta.ScaleY.Value;
+        if (delta.ScaleZ.HasValue)
+            scale.z = delta.ScaleZ.Value;
+        transform.localScale = scale;
     }
 
     private static Vector3 MaskVector(Vector3 vector, Vector3 mask) =>

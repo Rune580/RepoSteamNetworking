@@ -112,6 +112,8 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                 
                 var overrideBackingField = attr.GetNamedArgument<string>("OverrideBackingField");
                 
+                var callbackMethodName = attr.GetNamedArgument<string>("CallbackMethodName");
+                
                 var propertySymbol = (IPropertySymbol)syntaxContext.TargetSymbol;
                 var propertySyntax = (BasePropertyDeclarationSyntax)syntaxContext.TargetNode;
                 
@@ -142,6 +144,7 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                     NeedsField = needsField,
                     BaseTypeTree = baseTypeTree,
                     ChangeKind = changeKind,
+                    CallbackMethodName = callbackMethodName
                 };
             }
         );
@@ -271,6 +274,10 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                         break;
                 }
                 
+                
+                if (!string.IsNullOrWhiteSpace(prop.CallbackMethodName))
+                    code.AppendLine($"{prop.CallbackMethodName}(({prop.TypeName})value);");
+                
                 code.AppendLine("break;");
             }
             code.AppendLine("default:")
@@ -291,6 +298,7 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
         public string Namespace { get; set; }
         public string ClassName { get; set; }
         public bool NeedsField { get; set; }
+        public string CallbackMethodName { get; set; }
         public string BaseTypeTree { get; set; }
         public bool HasNetworkPropertyListener { get; set; }
         public byte ChangeKind { get; set; }
