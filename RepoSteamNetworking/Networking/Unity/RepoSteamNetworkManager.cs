@@ -1,14 +1,16 @@
 using System.Collections.Generic;
-using RepoSteamNetworking.API;
 using RepoSteamNetworking.API.Asset;
 using RepoSteamNetworking.API.Unity;
 using RepoSteamNetworking.Networking.Data;
 using RepoSteamNetworking.Networking.NetworkedProperties;
 using RepoSteamNetworking.Networking.Registries;
-using RepoSteamNetworking.Testing;
 using RepoSteamNetworking.Utils;
 using UnityEngine;
+#if DEBUG
+using RepoSteamNetworking.API;
+using RepoSteamNetworking.Testing;
 using UnityEngine.InputSystem;
+#endif
 
 namespace RepoSteamNetworking.Networking.Unity;
 
@@ -44,26 +46,29 @@ public class RepoSteamNetworkManager : MonoBehaviour
             _networkPropertySyncTimer -= NetworkPropertySyncInterval;
             NetworkedPropertyManager.SyncNetworkedProperties();
         }
-        
+#if DEBUG
         if (Keyboard.current.hKey.wasPressedThisFrame)
         {
             if (!RepoNetworkingServer.Instance.ServerActive)
                 return;
-
+        
             var player = PlayerAvatar.instance;
             var pos = player.transform.position;
-
+        
             var prefabRef = RepoSteamNetworkingPlugin.TestBundle.GetAssetReference("assets/Example Object.prefab");
-
+        
             prefabRef = prefabRef.WithModifications(prefab =>
             {
-                prefab.AddComponent<NetworkTransform>();
+                var networkTransform = prefab.AddComponent<NetworkTransform>();
+                networkTransform.doInterpolation = true;
+                
                 prefab.AddComponent<NetworkRigidbody>();
                 prefab.AddComponent<ExampleBehaviour>();
             });
-
+        
             RepoSteamNetwork.InstantiatePrefab(prefabRef, pos);
         }
+#endif
     }
 
     public void RegisterNetworkIdentity(RepoSteamNetworkIdentity networkIdentity)

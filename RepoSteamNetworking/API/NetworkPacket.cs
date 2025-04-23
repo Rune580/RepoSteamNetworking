@@ -2,7 +2,6 @@ using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Networking.Registries;
 using RepoSteamNetworking.Networking.Serialization;
-using RepoSteamNetworking.Utils;
 using Steamworks;
 
 namespace RepoSteamNetworking.API;
@@ -52,10 +51,6 @@ public abstract class NetworkPacket
     internal NetworkPacket Deserialize(SocketMessage message)
     {
         ReadData(message);
-
-#if DEBUG
-        Logging.Info(this.DebugFormat(true, true));
-#endif
         
         return this;
     }

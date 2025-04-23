@@ -35,6 +35,8 @@ public struct BitFlags
         get => _bits[index];
         set
         {
+            _bits ??= new bool[8];
+            
             while (index >= _bits.Length)
                 Array.Resize(ref _bits, _bits.Length * 2);
             

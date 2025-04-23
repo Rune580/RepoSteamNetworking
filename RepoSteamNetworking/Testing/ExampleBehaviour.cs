@@ -1,3 +1,4 @@
+#if DEBUG
 using RepoSteamNetworking.API.Unity;
 using RepoSteamNetworking.Networking.NetworkedProperties;
 using UnityEngine;
@@ -46,3 +47,4 @@ public partial class ExampleBehaviour : MonoBehaviour
         }
     }
 }
+#endif

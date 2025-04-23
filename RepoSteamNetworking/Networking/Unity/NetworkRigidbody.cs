@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace RepoSteamNetworking.Networking.Unity;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Rigidbody), typeof(NetworkTransform))]
 [DisallowMultipleComponent]
 public class NetworkRigidbody : MonoBehaviour
 {

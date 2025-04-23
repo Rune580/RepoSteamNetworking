@@ -167,7 +167,7 @@ public static class RepoSteamNetwork
         VersionCompatRegistry.RegisterMod(pluginInfo.GUID, pluginInfo.Version, new RSNVersionCompatibilityAttribute(compatibility, optional));
     }
 
-    public static void SendPackets<TPacket>(IEnumerable<TPacket> packets, NetworkDestination destination = NetworkDestination.PacketTarget)
+    public static void SendPackets<TPacket>(IEnumerable<TPacket> packets, NetworkDestination destination = NetworkDestination.Everyone)
         where TPacket : NetworkPacket
     {
         foreach (var packet in packets)
@@ -185,7 +185,7 @@ public static class RepoSteamNetwork
         {
             RepoNetworkingClient.Instance.SendSocketMessageToServer(message);
         }
-        else if (RepoNetworkingServer.Instance.ServerActive)
+        else if (IsServer)
         {
             if (destination == NetworkDestination.PacketTarget && packet.Header.Target.IsValid)
             {

@@ -4,9 +4,43 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <LangVersion>preview</LangVersion>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <Authors>Rune580</Authors>
+        <Product>RepoSteamNetworking.SourceGenerators</Product>
     </PropertyGroup>
-    
+
+    <!-- Nuget Package specific -->
+    <PropertyGroup>
+        <PackageId>Rune580.Mods.Repo.RepoSteamNetworking.SourceGenerators</PackageId>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/Rune580/RepoSteamNetworking</PackageProjectUrl>
+        <PackageIcon>icon.png</PackageIcon>
+        <RepositoryUrl>https://github.com/Rune580/RepoSteamNetworking</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+    </PropertyGroup>
+
+    <!-- Nuget Package includes -->
     <ItemGroup>
+        <None Include="../README.md" Pack="true" PackagePath="/" Visible="false" />
+        <None Include="../LICENSE" Pack="true" PackagePath="/" Visible="false" />
+        <None Include="../Thunderstore/icons/icon.png" Pack="true" PackagePath="/" Visible="false" />
+    </ItemGroup>
+
+    <!-- MinVer -->
+    <PropertyGroup>
+        <MinVerDefaultPreReleaseIdentifiers>dev</MinVerDefaultPreReleaseIdentifiers>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+
+    <!-- Project Nuget Packages -->
+    <ItemGroup>
+        <PackageReference Include="MinVer" Version="6.0.0">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

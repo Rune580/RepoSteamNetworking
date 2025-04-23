@@ -1,7 +1,9 @@
 using RepoSteamNetworking.API;
 using RepoSteamNetworking.API.Unity;
 using RepoSteamNetworking.Networking.Data;
+using RepoSteamNetworking.Utils.Tween;
 using UnityEngine;
+using UnityEngine.UI.CoroutineTween;
 
 namespace RepoSteamNetworking.Networking.Unity;
 
@@ -27,6 +29,8 @@ public partial class NetworkTransform : MonoBehaviour
     public float positionThreshold = 0.001f;
     public float rotationThreshold = 0.01f;
     public float scaleThreshold = 0.01f;
+
+    public bool doInterpolation;
     
     public int ticksPerSecond = 30;
 
@@ -40,12 +44,20 @@ public partial class NetworkTransform : MonoBehaviour
     private Vector3 _lastValidPosition;
     private Vector3 _lastValidRotation;
     private Vector3 _lastValidScale;
+
+    private readonly TweenRunner<Vector3Tween> _positionTweenRunner = new();
+    private readonly TweenRunner<Vector3Tween> _rotationTweenRunner = new();
+    private readonly TweenRunner<Vector3Tween> _scaleTweenRunner = new();
     
     private void Awake()
     {
         _lastValidPosition = transform.position;
         _lastValidRotation = transform.eulerAngles;
         _lastValidScale = transform.localScale;
+        
+        _positionTweenRunner.Init(this);
+        _rotationTweenRunner.Init(this);
+        _scaleTweenRunner.Init(this);
     }
 
     private void Update()
@@ -109,8 +121,6 @@ public partial class NetworkTransform : MonoBehaviour
         if (RepoSteamNetwork.IsServer)
             return;
         
-        Debug.Log($"Received Delta {delta.PositionX}, {delta.PositionY}, {delta.PositionZ}");
-        
         var position = transform.position;
         if (delta.PositionX.HasValue)
             position.x = delta.PositionX.Value;
@@ -118,7 +128,6 @@ public partial class NetworkTransform : MonoBehaviour
             position.y = delta.PositionY.Value;
         if (delta.PositionZ.HasValue)
             position.z = delta.PositionZ.Value;
-        transform.position = position;
         
         var rotation = transform.eulerAngles;
         if (delta.RotationX.HasValue)
@@ -127,7 +136,6 @@ public partial class NetworkTransform : MonoBehaviour
             rotation.y = delta.RotationY.Value;
         if (delta.RotationZ.HasValue)
             rotation.z = delta.RotationZ.Value;
-        transform.eulerAngles = rotation;
         
         var scale = transform.localScale;
         if (delta.ScaleX.HasValue)
@@ -136,6 +144,84 @@ public partial class NetworkTransform : MonoBehaviour
             scale.y = delta.ScaleY.Value;
         if (delta.ScaleZ.HasValue)
             scale.z = delta.ScaleZ.Value;
+
+        if (doInterpolation)
+        {
+            TweenTransform(position, rotation, scale);
+        }
+        else
+        {
+            SetTransform(position, rotation, scale);
+        }
+    }
+
+    private void TweenTransform(Vector3 position, Vector3 rotation, Vector3 scale)
+    {
+        if (position != transform.position)
+        {
+            var posTween = new Vector3Tween
+            {
+                duration = (float)TimePerTick,
+                ignoreTimeScale = true,
+                StartValue = transform.position,
+                TargetValue = position
+            };
+            posTween.AddOnChangedCallback(TweenCallbackPosition);
+            
+            _positionTweenRunner.StopTween();
+            _positionTweenRunner.StartTween(posTween);
+        }
+
+        if (rotation != transform.eulerAngles)
+        {
+            var rotTween = new Vector3Tween
+            {
+                duration = (float)TimePerTick,
+                ignoreTimeScale = true,
+                StartValue = transform.eulerAngles,
+                TargetValue = rotation
+            };
+            rotTween.AddOnChangedCallback(TweenCallbackRotation);
+            
+            _rotationTweenRunner.StopTween();
+            _rotationTweenRunner.StartTween(rotTween);
+        }
+        
+        if (scale != transform.localScale)
+        {
+            var scaleTween = new Vector3Tween
+            {
+                duration = (float)TimePerTick,
+                ignoreTimeScale = true,
+                StartValue = transform.localScale,
+                TargetValue = scale
+            };
+            scaleTween.AddOnChangedCallback(TweenCallbackScale);
+            
+            _scaleTweenRunner.StopTween();
+            _scaleTweenRunner.StartTween(scaleTween);
+        }
+    }
+
+    private void SetTransform(Vector3 position, Vector3 rotation, Vector3 scale)
+    {
+        transform.position = position;
+        transform.eulerAngles = rotation;
+        transform.localScale = scale;
+    }
+
+    private void TweenCallbackPosition(Vector3 position)
+    {
+        transform.position = position;
+    }
+    
+    private void TweenCallbackRotation(Vector3 rotation)
+    {
+        transform.eulerAngles = rotation;
+    }
+    
+    private void TweenCallbackScale(Vector3 scale)
+    {
         transform.localScale = scale;
     }
 
