@@ -1,9 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Prefab;
 using RepoSteamNetworking.Prefab.Modifications;
-using RepoSteamNetworking.Utils;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -17,10 +17,10 @@ public struct PrefabReference
     public string assetPath;
 
     [NonSerialized]
-    private Action<GameObject>? _modifyPrefabAction;
+    private List<Action<GameObject>> _modifyPrefabActions = [];
     public BasePrefabModification[] Modifications = [];
     
-    public bool HasModifications => _modifyPrefabAction is not null || Modifications.Length > 0;
+    public bool HasModifications => _modifyPrefabActions.Count > 0 || Modifications.Length > 0;
 
     public PrefabReference(PrefabReference other)
     {
@@ -51,23 +51,36 @@ public struct PrefabReference
         return NetworkAssetDatabase.LoadAssetAsync<T>(this);
     }
 
+    /// <summary>
+    /// Creates a new instance of <see cref="PrefabReference"/> with added modifications applied to the prefab GameObject.
+    /// </summary>
+    /// <param name="modifyPrefabAction">
+    /// An action to be executed on a <see cref="GameObject"/> that defines how the GameObject
+    /// will be modified.
+    /// </param>
+    /// <returns>
+    /// A new instance of <see cref="PrefabReference"/> with the applied modifications.
+    /// </returns>
     [Pure]
     public PrefabReference WithModifications(Action<GameObject> modifyPrefabAction)
     {
         var newPrefabRef = new PrefabReference(this)
         {
-            _modifyPrefabAction = modifyPrefabAction
+            _modifyPrefabActions = [.._modifyPrefabActions, modifyPrefabAction]
         };
         return newPrefabRef;
     }
 
     internal void CreateModifications(GameObject prefab)
     {
-        if (_modifyPrefabAction is null)
+        if (_modifyPrefabActions.Count <= 0)
             return;
 
         var originalState = new PrefabState(prefab);
-        _modifyPrefabAction.Invoke(prefab);
+
+        foreach (var modifyPrefabAction in _modifyPrefabActions)
+            modifyPrefabAction.Invoke(prefab);
+        
         var modifiedState = new PrefabState(prefab);
         
         Modifications = originalState.GetModifications(modifiedState).AsArray();

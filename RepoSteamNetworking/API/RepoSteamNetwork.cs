@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using BepInEx;
 using RepoSteamNetworking.API.Asset;
-using RepoSteamNetworking.API.Unity;
 using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Networking.Packets;
@@ -250,8 +249,15 @@ public static class RepoSteamNetwork
     
     public static void InstantiatePrefab(PrefabReference prefab, Transform target, Quaternion rotation) => InstantiatePrefab(prefab, target, Vector3.zero, rotation);
     
-    public static void InstantiatePrefab(PrefabReference prefabRef, Transform? target, Vector3 position, Quaternion rotation)
+    public static void InstantiatePrefab(PrefabReference prefabRef, Transform? target, Vector3 position,
+        Quaternion rotation)
     {
+        if (!IsServer)
+        {
+            Logging.Warn("Only the host may instantiate prefabs!");
+            return;
+        }
+        
         if (prefabRef.HasModifications)
         {
             var prefab = NetworkAssetDatabase.LoadAsset<GameObject>(prefabRef);
@@ -270,8 +276,10 @@ public static class RepoSteamNetwork
             Object.DestroyImmediate(modifiedPrefab);
         }
         
-        var packet = new InstantiateNetworkedPrefabServerPacket
+        var networkId = RepoSteamNetworkManager.Instance.NewNetworkId;
+        var packet = new InstantiateNetworkedPrefabPacket
         {
+            NetworkId = networkId,
             Prefab = prefabRef,
             Position = position,
             Rotation = rotation
@@ -279,22 +287,22 @@ public static class RepoSteamNetwork
         
         packet.SetTargetTransform(target);
         
-        SendPacket(packet, NetworkDestination.HostOnly);
+        SendPacket(packet);
     }
 
     /// <summary>
-    /// 
+    /// Registers an AssetBundle containing prefabs to be used within the networked environment.
     /// </summary>
-    /// <param name="assetBundle">AssetBundle containing the prefabs to register.</param>
-    /// <param name="modGuid">GUID of the mod the AssetBundle belongs to. Tries to detect GUID automatically if left unset.</param>
-    /// <param name="bundleName">Sets the name the AssetBundle will referenced by. Set to the name property of the AssetBundle if left unset.</param>
-    /// <returns></returns>
+    /// <param name="assetBundle">The AssetBundle containing the prefabs to register.</param>
+    /// <param name="modGuid">The GUID of the mod that the AssetBundle belongs to. If left unset, the GUID will be automatically detected based on the calling assembly.</param>
+    /// <param name="bundleName">The reference name for the AssetBundle. Defaults to the name property of the AssetBundle if left unset.</param>
+    /// <returns>An AssetBundleReference representing the registered AssetBundle.</returns>
     public static AssetBundleReference RegisterAssetBundle(AssetBundle assetBundle, string modGuid = "", string bundleName = "")
     {
-        // Set bundleName to name of assetBundle if not already set.
+        // Set bundleName to the name of assetBundle if not already set.
         if (string.IsNullOrWhiteSpace(bundleName))
             bundleName = assetBundle.name;
-        
+
         // Try and get the modGuid from the calling assembly.
         if (string.IsNullOrWhiteSpace(modGuid))
         {

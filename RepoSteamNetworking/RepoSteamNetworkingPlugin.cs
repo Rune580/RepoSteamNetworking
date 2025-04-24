@@ -1,17 +1,19 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
+﻿using System.Reflection;
 using BepInEx;
-using BepInEx.Bootstrap;
 using HarmonyLib;
 using RepoSteamNetworking.API;
-using RepoSteamNetworking.API.Asset;
 using RepoSteamNetworking.API.VersionCompat;
 using RepoSteamNetworking.Networking;
 using RepoSteamNetworking.Networking.NetworkedProperties;
 using RepoSteamNetworking.Networking.Packets;
 using RepoSteamNetworking.Utils;
+#if DEBUG
+using System;
+using System.IO;
+using BepInEx.Bootstrap;
+using RepoSteamNetworking.API.Asset;
 using UnityEngine;
+#endif
 
 namespace RepoSteamNetworking;
 
@@ -19,7 +21,9 @@ namespace RepoSteamNetworking;
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 public class RepoSteamNetworkingPlugin : BaseUnityPlugin
 {
+#if DEBUG
     internal static AssetBundleReference TestBundle;
+#endif
     
     private void Awake()
     {
@@ -28,8 +32,10 @@ public class RepoSteamNetworkingPlugin : BaseUnityPlugin
         Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), MyPluginInfo.PLUGIN_GUID);
         
         RegisterPackets();
-        
+
+#if DEBUG
         DoAssetBundleStuff();
+#endif
     }
 
     private void RegisterPackets()
@@ -55,14 +61,12 @@ public class RepoSteamNetworkingPlugin : BaseUnityPlugin
         
         RepoSteamNetwork.RegisterPacket<NetworkedPropertiesDataPacket>();
         RepoSteamNetwork.AddCallback<NetworkedPropertiesDataPacket>(NetworkedPropertyManager.OnNetworkedPropertiesPacketReceived);
-
-        RepoSteamNetwork.RegisterPacket<InstantiateNetworkedPrefabServerPacket>();
-        RepoSteamNetwork.AddCallback<InstantiateNetworkedPrefabServerPacket>(PacketHandler.OnInstantiateNetworkedPrefabServerPacketReceived);
         
-        RepoSteamNetwork.RegisterPacket<InstantiateNetworkedPrefabClientPacket>();
-        RepoSteamNetwork.AddCallback<InstantiateNetworkedPrefabClientPacket>(PacketHandler.OnInstantiateNetworkedPrefabClientPacketReceived);
+        RepoSteamNetwork.RegisterPacket<InstantiateNetworkedPrefabPacket>();
+        RepoSteamNetwork.AddCallback<InstantiateNetworkedPrefabPacket>(PacketHandler.OnInstantiateNetworkedPrefabPacketReceived);
     }
 
+#if DEBUG
     private void DoAssetBundleStuff()
     {
         if (!Chainloader.PluginInfos.TryGetValue(MyPluginInfo.PLUGIN_GUID, out var pluginInfo))
@@ -87,4 +91,5 @@ public class RepoSteamNetworkingPlugin : BaseUnityPlugin
 
         TestBundle = RepoSteamNetwork.RegisterAssetBundle(assetBundle, MyPluginInfo.PLUGIN_GUID);
     }
+#endif
 }

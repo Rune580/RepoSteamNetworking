@@ -8,14 +8,15 @@ using UnityEngine;
 
 namespace RepoSteamNetworking.Networking.Packets;
 
-internal class InstantiateNetworkedPrefabServerPacket : NetworkPacket<InstantiateNetworkedPrefabServerPacket>
+internal class InstantiateNetworkedPrefabPacket : NetworkPacket<InstantiateNetworkedPrefabPacket>
 {
+    public uint NetworkId { get; set; }
     public PrefabReference Prefab { get; set; }
     public bool HasTarget { get; private set; }
     public SerializableNetworkTransform TargetTransform { get; private set; }
     public Vector3 Position { get; set; }
     public Quaternion Rotation { get; set; }
-
+    
     public void SetTargetTransform(Transform? target)
     {
         HasTarget = false;
@@ -39,6 +40,7 @@ internal class InstantiateNetworkedPrefabServerPacket : NetworkPacket<Instantiat
     
     protected override void WriteData(SocketMessage socketMessage)
     {
+        socketMessage.Write(NetworkId);
         socketMessage.Write(Prefab);
         socketMessage.Write(HasTarget);
         if (HasTarget)
@@ -49,6 +51,7 @@ internal class InstantiateNetworkedPrefabServerPacket : NetworkPacket<Instantiat
 
     protected override void ReadData(SocketMessage socketMessage)
     {
+        NetworkId = socketMessage.Read<uint>();
         Prefab = socketMessage.Read<PrefabReference>();
         HasTarget = socketMessage.Read<bool>();
         if (HasTarget)

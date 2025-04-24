@@ -62,7 +62,7 @@ internal static class NetworkAssetDatabase
 
         var assetPaths = bundle.GetAllAssetNames();
 
-        return assetPaths.Select(path => bundleRef.GetAssetReference(path));
+        return assetPaths.Select(path => bundleRef.GetPrefabReference(path));
     }
 
     private struct NetworkAssetBundle

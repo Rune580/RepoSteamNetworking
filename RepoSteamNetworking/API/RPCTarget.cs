@@ -1,4 +1,4 @@
-namespace RepoSteamNetworking.API.Unity;
+namespace RepoSteamNetworking.API;
 
 public enum RPCTarget
 {

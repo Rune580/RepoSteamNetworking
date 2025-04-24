@@ -135,24 +135,7 @@ internal static class PacketHandler
         RepoSteamNetwork.InvokeRPC(packet.NetworkId, packet.GuidPaletteId, packet.SubId, packet.MethodName, packet.Parameters);
     }
 
-    public static void OnInstantiateNetworkedPrefabServerPacketReceived(InstantiateNetworkedPrefabServerPacket packet)
-    {
-        var networkId = RepoSteamNetworkManager.Instance.NewNetworkId;
-        var clientPacket = new InstantiateNetworkedPrefabClientPacket
-        {
-            NetworkId = networkId,
-        };
-        
-        clientPacket.WithServerData(packet);
-
-#if DEBUG
-        Logging.Info("Telling clients to Instantiate Prefabs");
-#endif
-        
-        RepoSteamNetwork.SendPacket(clientPacket);
-    }
-
-    public static void OnInstantiateNetworkedPrefabClientPacketReceived(InstantiateNetworkedPrefabClientPacket packet)
+    public static void OnInstantiateNetworkedPrefabPacketReceived(InstantiateNetworkedPrefabPacket packet)
     {
 #if DEBUG
         Logging.Info($"Instantiating networked prefab! network id: {packet.NetworkId}, asset reference: {packet.Prefab.ToString()}");
