@@ -47,6 +47,8 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
 
                 var changeKind = attr.GetNamedArgument<byte>("SendMethod");
                 
+                var writePerms = attr.GetNamedArgument<byte>("WritePermissions");
+                
                 var fieldSymbol = (IFieldSymbol)syntaxContext.TargetSymbol;
 
                 FieldDeclarationSyntax fieldSyntax = null;
@@ -81,6 +83,7 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                     ClassName = containingClass.Name,
                     BaseTypeTree = baseTypeTree,
                     ChangeKind = changeKind,
+                    WritePermissions = writePerms
                 };
             }
         );
@@ -109,6 +112,8 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                 
                 var attr = syntaxContext.Attributes[0];
                 var changeKind = attr.GetNamedArgument<byte>("SendMethod");
+                
+                var writePerms = attr.GetNamedArgument<byte>("WritePermissions");
                 
                 var overrideBackingField = attr.GetNamedArgument<string>("OverrideBackingField");
                 
@@ -144,6 +149,7 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                     NeedsField = needsField,
                     BaseTypeTree = baseTypeTree,
                     ChangeKind = changeKind,
+                    WritePermissions = writePerms,
                     CallbackMethodName = callbackMethodName
                 };
             }
@@ -200,7 +206,7 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
 
             var code = new CodeBuilder();
             
-            code.WithImports("RepoSteamNetworking.API.Unity", "RepoSteamNetworking.Networking.NetworkedProperties", "RepoSteamNetworking.Networking.Unity", "RepoSteamNetworking.Networking.Attributes")
+            code.WithImports("RepoSteamNetworking.API", "RepoSteamNetworking.API.Unity", "RepoSteamNetworking.Networking.NetworkedProperties", "RepoSteamNetworking.Networking.Unity", "RepoSteamNetworking.Networking.Attributes")
                 .WithNamespace(props[0].Namespace);
 
             code.AppendLine($"[GenerateBehaviourId]\npartial class {props[0].ClassName} : INetworkedPropertyListener\n{{");
@@ -216,8 +222,21 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
 
                 code.AppendLine($"{modifiers} {prop.TypeName} {prop.PropertyName}\n{{")
                     .AppendLine($"get => {prop.BackingFieldName};")
-                    .AppendLine("set\n{")
-                    .AppendLine($"if ({prop.BackingFieldName} == value)\n{{\nreturn;\n}}");
+                    .AppendLine("set\n{");
+
+                switch (prop.WritePermissions)
+                {
+                    case 0: // Host
+                        code.AppendLine("if (!RepoSteamNetwork.IsServer)\n{return;\n}");
+                        break;
+                    case 1: // Everyone
+                        break;
+                    case 2: // Owner
+                        // TODO
+                        break;
+                }
+                
+                code.AppendLine($"if ({prop.BackingFieldName} == value)\n{{\nreturn;\n}}");
 
                 switch (prop.ChangeKind)
                 {
@@ -266,10 +285,10 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
 
                 switch (prop.ChangeKind)
                 {
-                    case 0:
+                    case 0: // Set
                         code.AppendLine($"{prop.BackingFieldName} = ({prop.TypeName})value;");
                         break;
-                    case 1:
+                    case 1: // Deltas
                         code.AppendLine($"{prop.BackingFieldName} += ({prop.TypeName})value;");
                         break;
                 }
@@ -302,6 +321,7 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
         public string BaseTypeTree { get; set; }
         public bool HasNetworkPropertyListener { get; set; }
         public byte ChangeKind { get; set; }
+        public byte WritePermissions { get; set; }
         public string FullClassName => $"{Namespace}.{ClassName}";
     }
 }
