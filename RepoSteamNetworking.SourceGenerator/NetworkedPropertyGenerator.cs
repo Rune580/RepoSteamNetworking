@@ -227,7 +227,7 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                 switch (prop.WritePermissions)
                 {
                     case 0: // Host
-                        code.AppendLine("if (!RepoSteamNetwork.IsServer)\n{return;\n}");
+                        code.AppendLine("if (!RepoSteamNetwork.IsServer)\n{\nreturn;\n}");
                         break;
                     case 1: // Everyone
                         break;

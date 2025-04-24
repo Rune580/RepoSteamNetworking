@@ -81,9 +81,6 @@ internal class CodeBuilder
 
     public override string ToString()
     {
-        while (_indentLevel > 1)
-            AppendLine("}");
-        
         var code = new StringBuilder();
 
         foreach (var import in _imports)
@@ -92,6 +89,16 @@ internal class CodeBuilder
         code.AppendLine($"namespace {_currentNamespace}\n{{");
         
         code.Append(_body);
+        
+        var level = _indentLevel;
+        while (level > 1)
+        {
+            for (int i = 0; i < level; i++)
+                code.Append('\t');
+            
+            code.Append("}");
+            level--;
+        }
 
         code.Append("}");
 
