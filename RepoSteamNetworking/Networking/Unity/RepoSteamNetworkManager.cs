@@ -55,7 +55,7 @@ public class RepoSteamNetworkManager : MonoBehaviour
             var player = PlayerAvatar.instance;
             var pos = player.transform.position;
         
-            var prefabRef = RepoSteamNetworkingPlugin.TestBundle.GetAssetReference("assets/Example Object.prefab");
+            var prefabRef = RepoSteamNetworkingPlugin.TestBundle.GetPrefabReference("assets/Example Object.prefab");
         
             prefabRef = prefabRef.WithModifications(prefab =>
             {

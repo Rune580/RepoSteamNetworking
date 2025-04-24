@@ -7,6 +7,10 @@ using RepoSteamNetworking.Prefab.Modifications;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
+#if DEBUG
+using RepoSteamNetworking.Utils;
+#endif
+
 namespace RepoSteamNetworking.API.Asset;
 
 [Serializable]
