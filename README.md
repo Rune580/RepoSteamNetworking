@@ -6,7 +6,7 @@ API for R.E.P.O that allows for networking using Steamworks.
 > <ins>**This is an API for Mod Developers**</ins>
 > so they can offload their mods' networking off of the REPO Photon servers to help the REPO devs save bandwidth.
 
-Check the [wiki](https://github.com/Rune580/RepoSteamNetworking/wiki) for more up-to-date documentation.
+Check the [Full Documentation](https://rune580.github.io/RepoSteamNetworking/docs/getting-started.html) for up-to-date Docs
 
 Basic documentation is as follows
 
