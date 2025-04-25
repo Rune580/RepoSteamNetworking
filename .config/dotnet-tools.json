@@ -15,6 +15,13 @@
         "assembly-publicizer"
       ],
       "rollForward": true
+    },
+    "docfx": {
+      "version": "2.78.3",
+      "commands": [
+        "docfx"
+      ],
+      "rollForward": false
     }
   }
 }
