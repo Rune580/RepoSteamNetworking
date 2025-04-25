@@ -3,7 +3,12 @@
 
 # Getting Started
 
-## Step 1
 Add the nuget packages to your project
+```xml
+<ItemGroup>
+    <PackageReference Include="Rune580.Mods.Repo.RepoSteamNetworking" Version="0.1.0" />
+    <PackageReference Include="Rune580.Mods.Repo.RepoSteamNetworking.SourceGenerators" Version="0.1.0" />
+</ItemGroup>
+```
 
-[!INCLUDE [<title>](../resources/nuget-package-snippet.md)]
+Select an article on the left.
