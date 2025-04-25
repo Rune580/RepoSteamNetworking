@@ -6,8 +6,8 @@ repository = "https://thunderstore.io"
 
 [package]
 namespace = "Rune580"
-name = "REPO_SteamNetworking"
-description = "API/Library for networking using Steamworks socket relays."
+name = "REPO_SteamNetworking_Lib"
+description = "API/Library for networking using Steamworks socket relays. Very much WIP, but still usable, mostly."
 websiteUrl = "https://github.com/Rune580/RepoSteamNetworking"
 containsNsfwContent = false
 

@@ -1,0 +1,29 @@
+apiRules:
+- exclude:
+    uidRegex: ^RepoSteamNetworking\.MyPluginInfo$
+    type: Class
+- exclude:
+    uidRegex: ^RepoSteamNetworking\.RepoSteamNetworkingPlugin$
+    type: Class
+- exclude:
+    uidRegex: ^RepoSteamNetworking\.Networking\.Unity\.Repo
+    type: Class
+- include:
+    uidRegex: ^RepoSteamNetworking\.Networking\.Packets\.PacketHeader
+- exclude:
+    uidRegex: ^RepoSteamNetworking\.Networking\.Packets
+- exclude:
+    uidRegex: ^RepoSteamNetworking\.Networking\.Data
+    type: Namespace
+- exclude:
+    uidRegex: ^RepoSteamNetworking\.Utils
+    type: Namespace
+- exclude:
+    uidRegex: ^RepoSteamNetworking\.Odin
+    type: Namespace
+- exclude:
+    uidRegex: ^RepoSteamNetworking\.Patches
+    type: Namespace
+- exclude:
+    uidRegex: ^RepoSteamNetworking\.Prefab
+    type: Namespace

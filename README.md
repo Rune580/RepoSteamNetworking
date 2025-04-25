@@ -1,8 +1,14 @@
 API for R.E.P.O that allows for networking using Steamworks.
 
-Heavily W.I.P. proper documentation along with nuget package will come closer to a more complete release.
+> [!IMPORTANT]
+> <ins>This does not allow you to host lobbies using steam or enable local hosting!</ins>
+> 
+> <ins>**This is an API for Mod Developers**</ins>
+> so they can offload their mods' networking off of the REPO Photon servers to help the REPO devs save bandwidth.
 
-basic documentation is as follows
+Check the [wiki](https://github.com/Rune580/RepoSteamNetworking/wiki) for more up-to-date documentation.
+
+Basic documentation is as follows
 
 ### Set version compatibility
 

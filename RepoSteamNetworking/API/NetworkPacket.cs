@@ -32,8 +32,12 @@ public abstract class NetworkPacket<TPacket> : NetworkPacket
 
 public abstract class NetworkPacket
 {
+    /// <summary>
+    /// Represents the header of a network packet, containing metadata about the packet's
+    /// id, destination, sender, and target.
+    /// </summary>
     public PacketHeader Header;
-    
+
     internal SocketMessage Serialize(NetworkDestination destination)
     {
         var message = new SocketMessage();
@@ -56,14 +60,14 @@ public abstract class NetworkPacket
     }
     
     /// <summary>
-    /// Write data into socket message that you want to send.
+    /// Write data into a socket message that you want to send.
     /// The order you write the data matters!
     /// </summary>
     /// <param name="socketMessage"></param>
     protected abstract void WriteData(SocketMessage socketMessage);
     
     /// <summary>
-    /// Read data from socket message.
+    /// Read data from a socket message.
     /// The order you read the data matters!
     /// </summary>
     /// <param name="socketMessage"></param>

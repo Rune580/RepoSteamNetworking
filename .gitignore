@@ -9,3 +9,6 @@ riderModule.iml
 .env
 
 dist/
+
+docfx/api/
+docfx/_site/

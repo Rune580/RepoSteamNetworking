@@ -14,7 +14,6 @@ public class SteamUserConnection : IEquatable<SteamUserConnection>
     private string _clientKey = "";
     private Connection _connection;
     private ConnectionInfo _info;
-    private NetIdentity _identity;
     private readonly Timer _timer;
 
     public uint ConnectionId => _connection.Id;
@@ -47,11 +46,11 @@ public class SteamUserConnection : IEquatable<SteamUserConnection>
 
         Status = ConnectionStatus.Unverified;
 
-        _identity = info.identity;
+        var identity = info.identity;
 
-        if (_identity.IsSteamId)
+        if (identity.IsSteamId)
         {
-            SteamId = _identity.SteamId;
+            SteamId = identity.SteamId;
         }
         else
         {

@@ -30,8 +30,11 @@ public partial class NetworkTransform : MonoBehaviour
     public float rotationThreshold = 0.01f;
     public float scaleThreshold = 0.01f;
 
+    /// <summary>
+    /// Determines whether interpolation is applied to the transform properties (position, rotation, and scale) of the game object. 
+    /// </summary>
     public bool doInterpolation;
-    
+
     public int ticksPerSecond = 30;
 
     private Vector3 PositionMask => new(syncPositionX ? 1 : 0, syncPositionY ? 1 : 0, syncPositionZ ? 1 : 0);
@@ -116,7 +119,7 @@ public partial class NetworkTransform : MonoBehaviour
         }
     }
 
-    private void OnReceivedDelta(NetworkTransformDelta delta)
+    private void OnReceivedDelta(NetworkTransformDelta oldDelta, NetworkTransformDelta delta)
     {
         if (RepoSteamNetwork.IsServer)
             return;

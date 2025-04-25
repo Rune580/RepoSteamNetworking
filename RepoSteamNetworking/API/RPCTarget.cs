@@ -1,5 +1,8 @@
 namespace RepoSteamNetworking.API;
 
+/// <summary>
+/// Specifies where the RPC will be executed.
+/// </summary>
 public enum RPCTarget
 {
     /// <summary>

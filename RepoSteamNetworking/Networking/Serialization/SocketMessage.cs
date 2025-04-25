@@ -41,6 +41,14 @@ public class SocketMessage : IDisposable
 
     internal byte[] GetBytes() => _buffer.ToArray();
 
+    /// <summary>
+    /// Writes a value of type <typeparamref name="T"/> to the internal buffer of the socket message.
+    /// </summary>
+    /// <typeparam name="T">The type of the value to be written.</typeparam>
+    /// <param name="value">The value to be written to the buffer.</param>
+    /// <remarks>
+    /// Uses Odin Serializer to write the value to the buffer.
+    /// </remarks>
     public SocketMessage Write<T>(T value)
     {
         SerializationUtility.SerializeValue(value, Writer);
@@ -56,6 +64,14 @@ public class SocketMessage : IDisposable
         return this;
     }
 
+    /// <summary>
+    /// Reads a value of type <typeparamref name="T"/> from the internal buffer of the socket message.
+    /// </summary>
+    /// <typeparam name="T">The type of the value to be read from the buffer.</typeparam>
+    /// <returns>The deserialized value of type <typeparamref name="T"/>.</returns>
+    /// <remarks>
+    /// Uses Odin Serializer to read the value from the buffer.
+    /// </remarks>
     public T Read<T>()
     {
         return SerializationUtility.DeserializeValue<T>(Reader);

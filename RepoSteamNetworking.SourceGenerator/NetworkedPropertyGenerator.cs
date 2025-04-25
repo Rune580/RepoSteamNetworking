@@ -282,6 +282,9 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                 var prop = props[i];
                 
                 code.AppendLine($"case {i}:");
+                
+                if (!string.IsNullOrWhiteSpace(prop.CallbackMethodName))
+                    code.AppendLine($"{prop.TypeName} oldValue = ({prop.TypeName})value;");
 
                 switch (prop.ChangeKind)
                 {
@@ -295,7 +298,7 @@ public class NetworkedPropertyGenerator : IIncrementalGenerator
                 
                 
                 if (!string.IsNullOrWhiteSpace(prop.CallbackMethodName))
-                    code.AppendLine($"{prop.CallbackMethodName}(({prop.TypeName})value);");
+                    code.AppendLine($"{prop.CallbackMethodName}(oldValue, ({prop.TypeName})value);");
                 
                 code.AppendLine("break;");
             }

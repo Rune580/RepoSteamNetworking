@@ -1,5 +1,8 @@
 namespace RepoSteamNetworking.Networking;
 
+/// <summary>
+/// Specifies the destination of a network packet.
+/// </summary>
 public enum NetworkDestination
 {
     /// <summary>
@@ -15,8 +18,8 @@ public enum NetworkDestination
     /// </summary>
     Everyone = 2,
     /// <summary>
-    /// Send to Target SteamId defined in the <see cref="RepoSteamNetworking.API.NetworkPacket"/> <see cref="RepoSteamNetworking.Networking.Packets.PacketHeader"/>.
-    /// If no target specified or the target is invalid, this packet will be dropped.
+    /// Send to <see cref="RepoSteamNetworking.Networking.Packets.PacketHeader.Target"/> SteamId defined in the <see cref="RepoSteamNetworking.API.NetworkPacket"/> <see cref="RepoSteamNetworking.Networking.Packets.PacketHeader"/>.
+    /// If no target is specified or the target is invalid, this packet will be dropped.
     /// </summary>
     PacketTarget = 3,
     /// <summary>

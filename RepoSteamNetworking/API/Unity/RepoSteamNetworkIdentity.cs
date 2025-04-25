@@ -9,6 +9,11 @@ namespace RepoSteamNetworking.API.Unity;
 [DisallowMultipleComponent]
 public class RepoSteamNetworkIdentity : MonoBehaviour
 {
+    /// <summary>
+    /// Represents the unique identifier for a networked object.
+    /// This identifier is assigned to an object when it is registered in the network
+    /// and remains constant for the lifetime of the object.
+    /// </summary>
     public uint NetworkId { get; private set; }
     public bool IsValid { get; private set; }
 
