@@ -33,6 +33,9 @@ jobs:
         run: |
           dotnet restore
           dotnet tool restore
+          
+      - name: Build project
+        run: dotnet build -c Release
       
       - name: Generate Docs
         run: dotnet tool run docfx docfx/docfx.json
