@@ -21,10 +21,10 @@ public struct PrefabReference
     public string assetPath;
 
     [NonSerialized]
-    private List<Action<GameObject>> _modifyPrefabActions = [];
+    private List<Action<GameObject>>? _modifyPrefabActions = [];
     public BasePrefabModification[] Modifications = [];
     
-    public bool HasModifications => _modifyPrefabActions.Count > 0 || Modifications.Length > 0;
+    public bool HasModifications => _modifyPrefabActions?.Count > 0 || Modifications.Length > 0;
 
     public PrefabReference(PrefabReference other)
     {
