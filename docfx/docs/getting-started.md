@@ -6,8 +6,8 @@
 Add the nuget packages to your project
 ```xml
 <ItemGroup>
-    <PackageReference Include="Rune580.Mods.Repo.RepoSteamNetworking" Version="0.1.0" />
-    <PackageReference Include="Rune580.Mods.Repo.RepoSteamNetworking.SourceGenerators" Version="0.1.0" />
+    <PackageReference Include="Rune580.Mods.Repo.RepoSteamNetworking" Version="0.1.1" />
+    <PackageReference Include="Rune580.Mods.Repo.RepoSteamNetworking.SourceGenerators" Version="0.1.1" />
 </ItemGroup>
 ```
 
