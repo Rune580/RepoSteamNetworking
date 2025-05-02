@@ -65,7 +65,7 @@ public partial class NetworkTransform : MonoBehaviour
 
     private void Update()
     {
-        if (!RepoSteamNetwork.IsServer)
+        if (!RepoSteamNetwork.IsServer || RepoSteamNetwork.IsSinglePlayer)
             return;
         
         _timer += Time.deltaTime;
@@ -121,7 +121,7 @@ public partial class NetworkTransform : MonoBehaviour
 
     private void OnReceivedDelta(NetworkTransformDelta oldDelta, NetworkTransformDelta delta)
     {
-        if (RepoSteamNetwork.IsServer)
+        if (RepoSteamNetwork.IsServer || RepoSteamNetwork.IsSinglePlayer)
             return;
         
         var position = transform.position;

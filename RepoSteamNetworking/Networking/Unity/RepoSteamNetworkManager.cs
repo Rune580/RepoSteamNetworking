@@ -49,7 +49,7 @@ public class RepoSteamNetworkManager : MonoBehaviour
 #if DEBUG
         if (Keyboard.current.hKey.wasPressedThisFrame)
         {
-            if (!RepoNetworkingServer.Instance.ServerActive)
+            if (!RepoSteamNetwork.IsServer && !RepoSteamNetwork.IsSinglePlayer)
                 return;
         
             var player = PlayerAvatar.instance;

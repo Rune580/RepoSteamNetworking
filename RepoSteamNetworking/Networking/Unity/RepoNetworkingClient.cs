@@ -16,6 +16,8 @@ public class RepoNetworkingClient : MonoBehaviour
     internal Lobby CurrentLobby { get; private set; }
     private RepoNetworkConnectionManager? _connectionManager;
     
+    internal bool ClientActive => _instance is not null && _clientActive;
+    
     internal static void CreateSingleton(GameObject parent)
     {
         if (_instance is not null)

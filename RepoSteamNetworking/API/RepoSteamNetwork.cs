@@ -34,9 +34,19 @@ public static class RepoSteamNetwork
     }
     
     /// <summary>
-    /// Use to determine if you're the host.
+    /// Are you the server Host?
     /// </summary>
     public static bool IsServer => RepoNetworkingServer.Instance.ServerActive;
+    
+    /// <summary>
+    /// Are you in SinglePlayer mode?
+    /// </summary>
+    public static bool IsSinglePlayer => !RepoNetworkingServer.Instance.ServerActive && !RepoNetworkingClient.Instance.ClientActive;
+    
+    /// <summary>
+    /// Determines if you have host-like authority.
+    /// </summary>
+    public static bool HasHostAuthority => IsServer || IsSinglePlayer;
 
     internal static void OnHostReceivedMessage(byte[] data, Connection connection, NetIdentity identity)
     {
@@ -47,7 +57,7 @@ public static class RepoSteamNetwork
         var packet = NetworkPacketRegistry.CreatePacket(header.PacketId);
         packet.Header = header;
 
-        if (identity.IsSteamId && header.Sender != sender)
+        if (IsServer && identity.IsSteamId && header.Sender != sender)
         {
             Logging.Warn($"{sender.GetLobbyName()} sent the incorrect SteamID {header.Sender} for their connection! Dropping connection...");
             if (RepoNetworkingServer.Instance.SocketManager!.TryGetSteamUserConnection(sender, out var userConnection))
@@ -58,8 +68,8 @@ public static class RepoSteamNetwork
             connection.Close();
             return;
         }
-
-        if (header.Destination == NetworkDestination.HostOnly)
+        
+        if (IsSinglePlayer && header.Destination is NetworkDestination.HostOnly or NetworkDestination.Everyone || header.Destination == NetworkDestination.HostOnly)
         {
             packet.Deserialize(message);
             NetworkPacketRegistry.InvokeCallbacks(packet);
@@ -79,6 +89,12 @@ public static class RepoSteamNetwork
             {
                 packet.Deserialize(message);
                 NetworkPacketRegistry.InvokeCallbacks(packet);
+                return;
+            }
+
+            if (IsSinglePlayer)
+            {
+                Logging.Info("Target of packet is unavailable in SinglePlayer!");
                 return;
             }
         }
@@ -179,6 +195,12 @@ public static class RepoSteamNetwork
         packet.Header.Sender = CurrentSteamId;
         
         var message = packet.Serialize(destination);
+
+        if (IsSinglePlayer)
+        {
+            OnHostReceivedMessage(message.GetBytes(), default, default);;
+            return;
+        }
         
         if (destination == NetworkDestination.HostOnly)
         {
@@ -252,7 +274,7 @@ public static class RepoSteamNetwork
     public static void InstantiatePrefab(PrefabReference prefabRef, Transform? target, Vector3 position,
         Quaternion rotation)
     {
-        if (!IsServer)
+        if (!IsServer && !IsSinglePlayer)
         {
             Logging.Warn("Only the host may instantiate prefabs!");
             return;

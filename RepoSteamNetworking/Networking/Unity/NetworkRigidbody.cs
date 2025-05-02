@@ -25,7 +25,7 @@ public class NetworkRigidbody : MonoBehaviour
 
     private void SetupRigidbody()
     {
-        if (!RepoSteamNetwork.IsServer)
+        if (!RepoSteamNetwork.HasHostAuthority)
         {
             _rigidbody.isKinematic = true;
         }

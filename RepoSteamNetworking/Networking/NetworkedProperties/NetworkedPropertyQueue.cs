@@ -59,7 +59,7 @@ internal class NetworkedPropertyQueue
         _networkedPropertyValues.Clear();
         IsEmpty = true;
 
-        // Handle sending data in separate thread to reduce overhead in calling threads.
+        // Handle sending data in a separate thread to reduce overhead in calling threads.
         ThreadPool.QueueUserWorkItem(ThreadedSendData, networkPropValues);
     }
 
