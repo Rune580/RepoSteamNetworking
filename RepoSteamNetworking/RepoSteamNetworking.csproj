@@ -58,10 +58,16 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1" />
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
         <PackageReference Include="BepInEx.Core" Version="5.*" />
-        <PackageReference Include="UnityEngine.Modules" Version="2022.3.21" />
-        <PackageReference Include="R.E.P.O.GameLibs.Steam" Version="0.1.2-ngd.0" Publicize="true" />
+        <PackageReference Include="UnityEngine.Modules" Version="2022.3.21">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="R.E.P.O.GameLibs.Steam" Version="0.1.2-ngd.0" Publicize="true" >
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
     </ItemGroup>
     
     <!-- Find Custom Formatters -->
