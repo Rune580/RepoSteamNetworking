@@ -62,10 +62,10 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="BepInEx.Core" Version="5.*" />
-        <PackageReference Include="UnityEngine.Modules" Version="2022.3.21">
+        <PackageReference Include="UnityEngine.Modules" Version="2022.3.62">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="R.E.P.O.GameLibs.Steam" Version="0.1.2-ngd.0" Publicize="true" >
+        <PackageReference Include="R.E.P.O.GameLibs.Steam" Version="0.3.0-ngd.0" Publicize="true">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
     </ItemGroup>

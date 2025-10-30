@@ -1,3 +1,7 @@
+### [0.1.2]
+Changes:
+ - Updated build dependencies
+
 ### [0.1.1]
 Added:
  - Support for SinglePlayer mode.
